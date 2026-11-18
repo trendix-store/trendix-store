@@ -1679,10 +1679,55 @@
                         }
                         resolve(dataUrl);
                     };
-                    image.src = reader.result;
+                    image.src = reader.result
                 };
                 reader.readAsDataURL(file);
             });
+        }
+
+        function openProductDetail(id) {
+            const product = products.find(item => String(item.id) === String(id));
+            if (!product) return;
+            activeDetailProductId = product.id;
+            activeGalleryIndex = 0;
+            renderProductDetail();
+            document.getElementById('product-detail-modal').classList.add('active');
+        }
+
+        function renderProductDetail() {
+            const product = products.find(item => String(item.id) === String(activeDetailProductId));
+            if (!product) return;
+            const images = product.images?.length ? [...new Set(product.images)] : splitProductImages(product.image);
+            activeGalleryIndex = Math.max(0, Math.min(activeGalleryIndex, images.length - 1));
+            const dots = images.map((_, index) => `<span class="gallery-dot ${index === activeGalleryIndex ? 'active' : ''}"></span>`).join('');
+            document.getElementById('product-detail-content').innerHTML = `
+                <div class="detail-layout">
+                    <div class="detail-gallery" ontouchstart="galleryTouchStart(event)" ontouchend="galleryTouchEnd(event)">
+                        <img src="${images[activeGalleryIndex]}" alt="${product.name}" onerror="this.src='${FALLBACK_LOGO}'">
+                        ${images.length > 1 ? `<button class="gallery-arrow prev" type="button" onclick="changeDetailImage(1)"><i class="fa-solid fa-chevron-right"></i></button><button class="gallery-arrow next" type="button" onclick="changeDetailImage(-1)"><i class="fa-solid fa-chevron-left"></i></button><div class="gallery-dots">${dots}</div>` : ''}
+                    </div>
+                    <div class="detail-info">
+                        <h2>${product.name}</h2>
+                        <p style="color:var(--text-muted);margin-bottom:14px;">${product.desc || ''}</p>
+                        <p style="color:var(--gold-light);font-size:1.35rem;font-weight:900;margin-bottom:16px;">${product.price} ج.م ${product.oldPrice ? `<span class="old-price">${product.oldPrice} ج.م</span>` : ''}</p>
+                        <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="addToCart(${product.id});closeModal('product-detail-modal')"><i class="fa-solid fa-cart-plus"></i> أضف للسلة</button>
+                    </div>
+                </div>`;
+        }
+
+        function changeDetailImage(direction) {
+            const product = products.find(item => String(item.id) === String(activeDetailProductId));
+            if (!product) return;
+            const images = product.images?.length ? [...new Set(product.images)] : splitProductImages(product.image);
+            activeGalleryIndex = (activeGalleryIndex + direction + images.length) % images.length;
+            renderProductDetail();
+        }
+
+        let galleryTouchX = 0;
+        function galleryTouchStart(event) { galleryTouchX = event.changedTouches[0].screenX; }
+        function galleryTouchEnd(event) {
+            const distance = event.changedTouches[0].screenX - galleryTouchX;
+            if (Math.abs(distance) > 45) changeDetailImage(distance < 0 ? -1 : 1);
         }
     </script>
 </body>
