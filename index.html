@@ -520,6 +520,32 @@
             text-decoration: none;
         }
 
+        .gallery-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border: 1px solid rgba(212,175,55,.7);
+            border-radius: 50%;
+            background: rgba(0,0,0,.75);
+            color: var(--gold-light);
+            cursor: pointer;
+            z-index: 3;
+        }
+        .gallery-arrow.prev { right: 8px; }
+        .gallery-arrow.next { left: 8px; }
+        .gallery-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display:flex; gap:5px; z-index:3; }
+        .gallery-dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); }
+        .gallery-dot.active { background:var(--gold-light); }
+
+        .detail-gallery { position:relative; width:100%; height:min(55vh,430px); background:#111; border-radius:12px; overflow:hidden; }
+        .detail-gallery img { width:100%; height:100%; object-fit:contain; }
+        .detail-layout { display:grid; grid-template-columns:1.1fr .9fr; gap:24px; }
+        .detail-info { text-align:right; }
+        .detail-info h2 { color:var(--gold-light); margin-bottom:10px; }
+        @media (max-width:700px) { .detail-layout { grid-template-columns:1fr; } .detail-gallery { height:360px; } }
+
         @media (max-width: 900px) {
             .hero-grid { grid-template-columns: 1fr; text-align: center; }
             .hero-text-content { text-align: center; }
@@ -859,9 +885,10 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>رابط الصورة (URL) أو ارفع صورة من جهازك *</label>
-                        <input type="text" id="prod-img-url" class="form-control" placeholder="ضع رابط الصورة هنا أو اختر ملفاً بالأسفل">
-                        <input type="file" id="prod-img-file" accept="image/*" class="form-control" style="margin-top: 8px;" onchange="handleImageUpload(event)">
+                        <label>صور المنتج (الصورة الأساسية ثم صور إضافية، رابط واحد في كل سطر) *</label>
+                        <textarea id="prod-img-url" class="form-control" rows="4" placeholder="ضع رابط الصورة الأساسية في السطر الأول&#10;ضع روابط الصور الإضافية في أسطر أخرى"></textarea>
+                        <input type="file" id="prod-img-file" accept="image/*" multiple class="form-control" style="margin-top: 8px;" onchange="handleMultipleImageUpload(event)">
+                        <small style="color:var(--text-muted);">يمكنك اختيار عدة صور للجوال، أو وضع روابط الصور أسطرًا منفصلة.</small>
                     </div>
                     <div class="form-group">
                         <label>وصف مختصر للمنتج</label>
@@ -876,6 +903,16 @@
                 <h3 style="color: var(--gold-light); margin-bottom: 10px;">3. المنتجات الحالية</h3>
                 <div id="admin-products-list"></div>
             </div>
+        </div>
+    </div>
+
+    <div class="modal" id="product-detail-modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-images"></i> تفاصيل المنتج</h2>
+                <button class="close-btn" onclick="closeModal('product-detail-modal')">&times;</button>
+            </div>
+            <div id="product-detail-content"></div>
         </div>
     </div>
 
@@ -941,6 +978,7 @@
                     price: Number(row.price),
                     oldPrice: row.old_price ?? "",
                     image: row.image || FALLBACK_LOGO,
+                    images: splitProductImages(row.image),
                     desc: row.description || ''
                 }));
             }
@@ -1048,10 +1086,11 @@
 
                 return `
                     <div class="product-card">
-                        <div class="product-img-wrap">
+                        <div class="product-img-wrap" onclick="openProductDetail(${p.id})" style="cursor:pointer;">
                             <span class="product-tag">${p.category}</span>
                             ${hasDiscount ? `<span class="discount-badge">خصم ${discountPercent}%</span>` : ''}
-                            <img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80'">
+                            <img src="${p.images?.[0] || p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80'">
+                            ${p.images?.length > 1 ? `<span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);color:#fff;border-radius:12px;padding:3px 8px;font-size:.75rem;">${p.images.length} صور</span>` : ''}
                         </div>
                         <div class="product-info">
                             <div>
@@ -1273,6 +1312,26 @@
             reader.readAsDataURL(file);
         }
 
+        function handleMultipleImageUpload(e) {
+            const files = e.target.files;
+            const urls = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    urls.push(event.target.result);
+                    document.getElementById('prod-img-url').value = urls.join('\n');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function splitProductImages(value) {
+            if (!value) return [FALLBACK_LOGO];
+            const images = String(value).split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+            return images.length ? [...new Set(images)] : [FALLBACK_LOGO];
+        }
+
         async function saveProduct(e) {
             e.preventDefault();
             const editId = document.getElementById('edit-prod-id').value;
@@ -1425,7 +1484,7 @@
             document.getElementById('prod-category').value = product.category;
             document.getElementById('prod-price').value = product.price;
             document.getElementById('prod-old-price').value = product.oldPrice || '';
-            document.getElementById('prod-img-url').value = product.image;
+            document.getElementById('prod-img-url').value = (product.images?.length ? product.images : splitProductImages(product.image)).join('\n');
             document.getElementById('prod-desc').value = product.desc || '';
 
             document.getElementById('form-title').textContent = '2. تعديل المنتج المحدد';
@@ -1440,6 +1499,55 @@
             document.getElementById('form-title').textContent = '2. إضافة منتج جديد';
             document.getElementById('save-prod-btn').innerHTML = '<i class="fa-solid fa-save"></i> حفظ ونشر المنتج';
             document.getElementById('cancel-edit-btn').style.display = 'none';
+        }
+
+        let activeDetailProductId = null;
+        let activeGalleryIndex = 0;
+
+        function openProductDetail(id) {
+            const product = products.find(item => String(item.id) === String(id));
+            if (!product) return;
+            activeDetailProductId = product.id;
+            activeGalleryIndex = 0;
+            renderProductDetail();
+            document.getElementById('product-detail-modal').classList.add('active');
+        }
+
+        function renderProductDetail() {
+            const product = products.find(item => String(item.id) === String(activeDetailProductId));
+            if (!product) return;
+            const images = product.images?.length ? product.images : splitProductImages(product.image);
+            activeGalleryIndex = Math.max(0, Math.min(activeGalleryIndex, images.length - 1));
+            const dots = images.map((_, index) => `<span class="gallery-dot ${index === activeGalleryIndex ? 'active' : ''}"></span>`).join('');
+
+            document.getElementById('product-detail-content').innerHTML = `
+                <div class="detail-layout">
+                    <div class="detail-gallery" id="detail-gallery" ontouchstart="galleryTouchStart(event)" ontouchend="galleryTouchEnd(event)">
+                        <img src="${images[activeGalleryIndex]}" alt="${product.name}" onerror="this.src='${FALLBACK_LOGO}'">
+                        ${images.length > 1 ? `<button class="gallery-arrow prev" type="button" onclick="changeDetailImage(1)"><i class="fa-solid fa-chevron-right"></i></button><button class="gallery-arrow next" type="button" onclick="changeDetailImage(-1)"><i class="fa-solid fa-chevron-left"></i></button><div class="gallery-dots">${dots}</div>` : ''}
+                    </div>
+                    <div class="detail-info">
+                        <h2>${product.name}</h2>
+                        <p style="color:var(--text-muted);margin-bottom:14px;">${product.desc || ''}</p>
+                        <p style="color:var(--gold-light);font-size:1.35rem;font-weight:900;margin-bottom:16px;">${product.price} ج.م ${product.oldPrice ? `<span class="old-price">${product.oldPrice} ج.م</span>` : ''}</p>
+                        <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="addToCart(${product.id});closeModal('product-detail-modal')"><i class="fa-solid fa-cart-plus"></i> أضف للسلة</button>
+                    </div>
+                </div>`;
+        }
+
+        function changeDetailImage(direction) {
+            const product = products.find(item => String(item.id) === String(activeDetailProductId));
+            if (!product) return;
+            const images = product.images?.length ? product.images : splitProductImages(product.image);
+            activeGalleryIndex = (activeGalleryIndex + direction + images.length) % images.length;
+            renderProductDetail();
+        }
+
+        let galleryTouchX = 0;
+        function galleryTouchStart(event) { galleryTouchX = event.changedTouches[0].screenX; }
+        function galleryTouchEnd(event) {
+            const distance = event.changedTouches[0].screenX - galleryTouchX;
+            if (Math.abs(distance) > 45) changeDetailImage(distance < 0 ? -1 : 1);
         }
     </script>
 </body>
