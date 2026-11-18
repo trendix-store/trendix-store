@@ -977,14 +977,14 @@
 
         let categories = defaultCategories;
         let savedCache = JSON.parse(localStorage.getItem('trendix_products_cache') || '[]');
-        let products = savedCache.length ? savedCache : [];
+        let products = savedCache.length ? savedCache.slice(0, 3) : defaultProducts;
         let orders = [];
         let cart = JSON.parse(localStorage.getItem('trendix_cart') || '[]');
         let currentFilter = 'الكل';
         let currentOrderFilter = 'all';
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
-        let productsLoaded = true;
+        let productsLoaded = false;
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
@@ -1118,12 +1118,14 @@
                 return categoryMatch && genderMatch;
             });
 
+            const renderedProducts = productsLoaded ? filtered : filtered.slice(0, 6);
+
             if (filtered.length === 0) {
                 grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد منتجات في هذا القسم حالياً.</p>`;
                 return;
             }
 
-            grid.innerHTML = filtered.map(p => {
+            grid.innerHTML = renderedProducts.map(p => {
                 let hasDiscount = p.oldPrice && Number(p.oldPrice) > Number(p.price);
                 let discountPercent = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
 
