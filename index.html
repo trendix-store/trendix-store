@@ -1364,7 +1364,8 @@
             e.preventDefault();
             const editId = document.getElementById('edit-prod-id').value;
             const name = document.getElementById('prod-name').value.trim();
-            const category = document.getElementById('prod-category').value;
+            const categorySelect = document.getElementById('prod-category');
+            const category = categorySelect.value;
             const gender = document.getElementById('prod-gender').value;
             const price = Number(document.getElementById('prod-price').value);
             const oldPrice = document.getElementById('prod-old-price').value ? Number(document.getElementById('prod-old-price').value) : null;
@@ -1374,6 +1375,14 @@
 
             const { error } = await trendixDb.from('trendix_products').upsert(row);
             if (error) { alert('تعذر حفظ المنتج: ' + error.message); return; }
+
+            const savedCategory = category;
+            await loadSharedData();
+            const savedProduct = products.find(item => String(item.id) === String(row.id));
+            if (savedProduct && savedProduct.category !== savedCategory) {
+                await trendixDb.from('trendix_products').update({ category: savedCategory }).eq('id', row.id);
+                await loadSharedData();
+            }
 
             await loadSharedData();
             renderProductsAdmin();
