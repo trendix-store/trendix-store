@@ -739,6 +739,11 @@
     </section>
 
     <div class="categories-bar" id="categories-bar"></div>
+    <div class="categories-bar" id="gender-filter-bar">
+        <button class="cat-btn active" onclick="filterGender('all')">الكل</button>
+        <button class="cat-btn" onclick="filterGender('men')">رجالي</button>
+        <button class="cat-btn" onclick="filterGender('women')">حريمي</button>
+    </div>
 
     <div class="container" id="products-section">
         <div class="products-grid" id="products-grid"></div>
@@ -874,6 +879,14 @@
                         <label>التصنيف / الصنف *</label>
                         <select id="prod-category" class="form-control" required></select>
                     </div>
+                    <div class="form-group">
+                        <label>الجنس *</label>
+                        <select id="prod-gender" class="form-control" required>
+                            <option value="رجالي">رجالي</option>
+                            <option value="حريمي">حريمي</option>
+                            <option value="مشترك">مشترك</option>
+                        </select>
+                    </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="form-group">
                             <label>السعر الحالي (بعد الخصم) *</label>
@@ -962,6 +975,7 @@
         let orders = [];
         let currentFilter = 'الكل';
         let currentOrderFilter = 'all';
+        let currentGenderFilter = 'all';
 
         async function loadSharedData() {
             const categoriesResult = await trendixDb.from('trendix_categories').select('*').order('id');
@@ -979,7 +993,8 @@
                     oldPrice: row.old_price ?? "",
                     image: row.image || FALLBACK_LOGO,
                     images: splitProductImages(row.image),
-                    desc: row.description || ''
+                    desc: row.description || '',
+                    gender: row.gender || 'مشترك',
                 }));
             }
 
@@ -1071,11 +1086,22 @@
             renderProducts();
         }
 
+        function filterGender(gender) {
+            currentGenderFilter = gender;
+            document.querySelectorAll('#gender-filter-bar .cat-btn').forEach(button => button.classList.remove('active'));
+            event.target.classList.add('active');
+            renderProducts();
+        }
+
         function renderProducts() {
             const grid = document.getElementById('products-grid');
-            const filtered = currentFilter === 'الكل'
-                ? products
-                : products.filter(p => p.category === currentFilter);
+            const filtered = products.filter(p => {
+                const categoryMatch = currentFilter === 'الكل' || p.category === currentFilter;
+                const genderMatch = currentGenderFilter === 'all' || p.gender === 'مشترك' ||
+                    (currentGenderFilter === 'men' && p.gender === 'رجالي') ||
+                    (currentGenderFilter === 'women' && p.gender === 'حريمي');
+                return categoryMatch && genderMatch;
+            });
 
             if (filtered.length === 0) {
                 grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد منتجات في هذا القسم حالياً.</p>`;
@@ -1339,11 +1365,12 @@
             const editId = document.getElementById('edit-prod-id').value;
             const name = document.getElementById('prod-name').value.trim();
             const category = document.getElementById('prod-category').value;
+            const gender = document.getElementById('prod-gender').value;
             const price = Number(document.getElementById('prod-price').value);
             const oldPrice = document.getElementById('prod-old-price').value ? Number(document.getElementById('prod-old-price').value) : null;
             const image = document.getElementById('prod-img-url').value.trim() || FALLBACK_LOGO;
             const desc = document.getElementById('prod-desc').value.trim();
-            const row = { id: editId ? Number(editId) : Date.now(), name, category, price, old_price: oldPrice, image, description: desc };
+            const row = { id: editId ? Number(editId) : Date.now(), name, category, gender, price, old_price: oldPrice, image, description: desc };
 
             const { error } = await trendixDb.from('trendix_products').upsert(row);
             if (error) { alert('تعذر حفظ المنتج: ' + error.message); return; }
