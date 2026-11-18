@@ -764,7 +764,6 @@
 
         <div class="phones-box">
             <a class="phone-chip" href="tel:+201050708955"><i class="fa-solid fa-phone"></i> 01050708955</a>
-            <a class="phone-chip" href="https://wa.me/201050708955" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
         </div>
 
         <div class="copyright">
@@ -802,7 +801,7 @@
                         <label>العنوان بالتفصيل (المنطقة / الشارع / علامة مميزة) *</label>
                         <textarea id="cust-address" class="form-control" rows="3" required placeholder="اكتب عنوانك بالتفصيل..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; font-size: 1.1rem; border-radius: 30px;">
+                    <button type="submit" id="confirm-order-btn" class="btn btn-gold" style="width: 100%; justify-content: center; font-size: 1.1rem; border-radius: 30px;">
                         <i class="fa-solid fa-check-circle"></i> تأكيد الطلب الآن
                     </button>
                 </form>
@@ -1249,13 +1248,20 @@
 
         async function submitOrder(e) {
             e.preventDefault();
+            const confirmBtn = document.getElementById('confirm-order-btn');
+            if (confirmBtn.disabled) return;
+
             const name = document.getElementById('cust-name').value.trim();
             const phone = normalizeEgyptPhone(document.getElementById('cust-phone').value);
             if (!/^20(?:10|11|12|15)\d{8}$/.test(phone)) {
                 alert('برجاء إدخال رقم موبايل مصر صحيح، مثال: 01012345678');
                 return;
             }
+
             const address = document.getElementById('cust-address').value.trim();
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأكيد الطلب...';
+
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const newOrder = {
                 id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
@@ -1274,7 +1280,14 @@
                 total: newOrder.total,
                 status: newOrder.status
             });
-            if (error) { alert('تعذر حفظ الطلب: ' + error.message); return; }
+
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-check-circle"></i> تأكيد الطلب الآن';
+
+            if (error) {
+                alert('تعذر حفظ الطلب: ' + error.message);
+                return;
+            }
 
             orders.unshift(newOrder);
             cart = [];
