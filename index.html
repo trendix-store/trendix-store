@@ -979,6 +979,7 @@
         let savedCache = JSON.parse(localStorage.getItem('trendix_products_cache') || '[]');
         let products = savedCache.length ? savedCache : [];
         let orders = [];
+        let cart = JSON.parse(localStorage.getItem('trendix_cart') || '[]');
         let currentFilter = 'الكل';
         let currentOrderFilter = 'all';
         let currentGenderFilter = 'all';
