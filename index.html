@@ -771,7 +771,7 @@
         </div>
     </footer>
 
-    <a href="https://wa.me/01050708955" target="_blank" rel="noopener" class="floating-wa" title="تواصل معنا عبر واتساب">
+    <a href="https://wa.me/201050708955" target="_blank" rel="noopener" class="floating-wa" title="تواصل معنا عبر واتساب">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
@@ -799,7 +799,7 @@
                     </div>
                     <div class="form-group">
                         <label>رقم الهاتف (يفضل عليه واتساب) *</label>
-                        <input type="tel" id="cust-phone" class="form-control" required placeholder="01xxxxxxxxx">
+                        <input type="tel" id="cust-phone" class="form-control" required placeholder="01050708955">
                     </div>
                     <div class="form-group">
                         <label>العنوان بالتفصيل (المنطقة / الشارع / علامة مميزة) *</label>
@@ -984,7 +984,7 @@
         let currentOrderFilter = 'all';
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
-        let productsLoaded = false;
+        let productsLoaded = true;
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
@@ -1107,7 +1107,7 @@
         function renderProducts() {
             const grid = document.getElementById('products-grid');
             if (!productsLoaded) {
-                grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل المنتجات...</p>';
+                grid.innerHTML = renderedProductsPreview();
                 return;
             }
             const filtered = products.filter(p => {
@@ -1248,7 +1248,11 @@
         async function submitOrder(e) {
             e.preventDefault();
             const name = document.getElementById('cust-name').value.trim();
-            const phone = document.getElementById('cust-phone').value.trim();
+            const phone = normalizeEgyptPhone(document.getElementById('cust-phone').value);
+            if (!/^20(?:10|11|12|15)\d{8}$/.test(phone)) {
+                alert('برجاء إدخال رقم موبايل مصر صحيح، مثال: 01012345678');
+                return;
+            }
             const address = document.getElementById('cust-address').value.trim();
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const newOrder = {
@@ -1426,7 +1430,12 @@
         }
 
         function openWhatsApp(waPhone, msgText) {
-            window.open(`https://wa.me/${waPhone}?text=${msgText}`, '_blank');
+            const phone = normalizeEgyptPhone(waPhone);
+            if (!/^20(?:10|11|12|15)\d{8}$/.test(phone)) {
+                alert('رقم الهاتف غير صحيح. يجب إدخال رقم موبايل مصر بصيغة 01012345678 أو 201012345678');
+                return;
+            }
+            window.open(`https://wa.me/${phone}?text=${msgText}`, '_blank');
         }
 
         function setOrderFilter(status) {
@@ -1479,8 +1488,7 @@
             list.innerHTML = filteredOrders.map(order => {
                 const realIndex = orders.findIndex(item => item.id === order.id);
                 const itemsText = order.items.map(item => `${item.name} (×${item.qty})`).join(' + ');
-                let phone = String(order.customer.phone).replace(/\D/g, '');
-                if (phone.startsWith('01')) phone = '2' + phone;
+                let phone = normalizeEgyptPhone(order.customer.phone);
 
                 const confirmMessage = encodeURIComponent(
                     `أهلاً بك يا ${order.customer.name}، تم استلام طلبك من TRENDIX بنجاح!\n` +
@@ -1593,6 +1601,22 @@
         }
 
         localStorage.setItem('trendix_products_cache', JSON.stringify(products));
+
+        function normalizeEgyptPhone(value) {
+            let phone = String(value || '').replace(/\D/g, '');
+            if (!phone) return '';
+
+            if (phone.startsWith('20')) {
+                return phone;
+            }
+            if (phone.startsWith('0')) {
+                return '20' + phone.substring(1);
+            }
+            if (/^(10|11|12|15)/.test(phone)) {
+                return '20' + phone;
+            }
+            return phone;
+        }
     </script>
 </body>
 </html>
