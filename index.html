@@ -1249,7 +1249,7 @@
         async function submitOrder(e) {
             e.preventDefault();
             const confirmBtn = document.getElementById('confirm-order-btn');
-            if (confirmBtn.disabled) return;
+            if (confirmBtn?.disabled) return;
 
             const name = document.getElementById('cust-name').value.trim();
             const phone = normalizeEgyptPhone(document.getElementById('cust-phone').value);
@@ -1259,10 +1259,22 @@
             }
 
             const address = document.getElementById('cust-address').value.trim();
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأكيد الطلب...';
+            if (!address) {
+                alert('برجاء كتابة عنوان التسليم بالتفصيل');
+                return;
+            }
 
-            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            if (!cart.length) {
+                alert('السلة فارغة');
+                return;
+            }
+
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأكيد الطلب...';
+            }
+
+            const total = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty)), 0);
             const newOrder = {
                 id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
                 date: new Date().toLocaleString('ar-EG'),
@@ -1272,30 +1284,33 @@
                 status: 'pending'
             };
 
-            const { error } = await trendixDb.from('trendix_orders').insert({
-                id: newOrder.id,
-                date: newOrder.date,
-                customer: newOrder.customer,
-                items: newOrder.items,
-                total: newOrder.total,
-                status: newOrder.status
-            });
+            try {
+                const { error } = await trendixDb.from('trendix_orders').insert({
+                    id: newOrder.id,
+                    date: newOrder.date,
+                    customer: newOrder.customer,
+                    items: newOrder.items,
+                    total: newOrder.total,
+                    status: newOrder.status
+                });
 
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = '<i class="fa-solid fa-check-circle"></i> تأكيد الطلب الآن';
+                if (error) throw new Error(error.message);
 
-            if (error) {
-                alert('تعذر حفظ الطلب: ' + error.message);
-                return;
+                orders.unshift(newOrder);
+                cart = [];
+                localStorage.setItem('trendix_cart', JSON.stringify(cart));
+                updateCartBadge();
+                document.getElementById('order-form').reset();
+                closeModal('cart-modal');
+                alert(`شكراً لك يا ${name}! تم استلام طلبك بنجاح برقم (${newOrder.id}).`);
+            } catch (error) {
+                alert('تعذر تأكيد الطلب: ' + (error?.message || 'تحقق من الاتصال بالإنترنت وحاول مرة أخرى'));
+            } finally {
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<i class="fa-solid fa-check-circle"></i> تأكيد الطلب الآن';
+                }
             }
-
-            orders.unshift(newOrder);
-            cart = [];
-            localStorage.setItem('trendix_cart', JSON.stringify(cart));
-            updateCartBadge();
-            document.getElementById('order-form').reset();
-            closeModal('cart-modal');
-            alert(`شكراً لك يا ${name}! تم استلام طلبك بنجاح برقم (${newOrder.id}).`);
         }
 
         function openAdminAuth() {
