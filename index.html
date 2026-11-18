@@ -966,42 +966,38 @@
         async function saveData() {
             localStorage.setItem('trendix_cart', JSON.stringify(cart));
 
-            const categoryDelete = await trendixDb.from('trendix_categories').delete().neq('id', 0);
-            if (categoryDelete.error) console.error(categoryDelete.error);
             if (categories.length) {
-                const categoryInsert = await trendixDb.from('trendix_categories').insert(
-                    categories.map(name => ({ name }))
+                await trendixDb.from('trendix_categories').upsert(
+                    categories.map(name => ({ name })),
+                    { onConflict: 'name' }
                 );
-                if (categoryInsert.error) console.error(categoryInsert.error);
             }
 
-            const productDelete = await trendixDb.from('trendix_products').delete().neq('id', 0);
-            if (productDelete.error) console.error(productDelete.error);
             if (products.length) {
-                const productInsert = await trendixDb.from('trendix_products').insert(products.map(product => ({
-                    id: product.id,
-                    name: product.name,
-                    category: product.category,
-                    price: product.price,
-                    old_price: product.oldPrice || null,
-                    image: product.image,
-                    description: product.desc || ''
-                })));
-                if (productInsert.error) console.error(productInsert.error);
+                await trendixDb.from('trendix_products').upsert(
+                    products.map(product => ({
+                        id: product.id,
+                        name: product.name,
+                        category: product.category,
+                        price: product.price,
+                        old_price: product.oldPrice || null,
+                        image: product.image,
+                        description: product.desc || ''
+                    }))
+                );
             }
 
-            const orderDelete = await trendixDb.from('trendix_orders').delete().neq('id', '');
-            if (orderDelete.error) console.error(orderDelete.error);
             if (orders.length) {
-                const orderInsert = await trendixDb.from('trendix_orders').insert(orders.map(order => ({
-                    id: order.id,
-                    date: order.date,
-                    customer: order.customer,
-                    items: order.items,
-                    total: order.total,
-                    status: order.status
-                })));
-                if (orderInsert.error) console.error(orderInsert.error);
+                await trendixDb.from('trendix_orders').upsert(
+                    orders.map(order => ({
+                        id: order.id,
+                        date: order.date,
+                        customer: order.customer,
+                        items: order.items,
+                        total: order.total,
+                        status: order.status
+                    }))
+                );
             }
 
             await loadSharedData();
