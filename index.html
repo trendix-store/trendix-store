@@ -1359,6 +1359,55 @@
             document.getElementById(id).classList.remove('active');
         }
 
+        function renderOrdersAdmin() {
+            const countEl = document.getElementById('orders-count');
+            const list = document.getElementById('orders-list');
+            if (countEl) countEl.textContent = orders.length;
+            if (!list) return;
+
+            let filteredOrders = orders;
+            if (currentOrderFilter !== 'all') {
+                filteredOrders = orders.filter(order => order.status === currentOrderFilter);
+            }
+
+            if (filteredOrders.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:25px;">لا توجد طلبات في هذا القسم حالياً.</p>';
+                return;
+            }
+
+            list.innerHTML = filteredOrders.map(order => {
+                const realIndex = orders.findIndex(item => item.id === order.id);
+                const itemsText = order.items.map(item => `${item.name} (×${item.qty})`).join(' + ');
+                let phone = String(order.customer.phone).replace(/\D/g, '');
+                if (phone.startsWith('01')) phone = '2' + phone;
+
+                const confirmMessage = encodeURIComponent(
+                    `أهلاً بك يا ${order.customer.name}، تم استلام طلبك من TRENDIX بنجاح!\n` +
+                    `تفاصيل الطلب: ${itemsText}\nإجمالي المنتجات: ${order.total} ج.م + مصاريف الشحن.`
+                );
+
+                const statusText = order.status === 'confirmed' ? '✅ تم التأكيد' : order.status === 'delivered' ? '📦 تم الاستلام' : '⏳ قيد الانتظار';
+                const statusClass = order.status === 'confirmed' ? 'badge-confirmed' : order.status === 'delivered' ? 'badge-delivered' : 'badge-pending';
+
+                return `
+                    <div class="order-card ${order.status === 'confirmed' ? 'status-confirmed' : order.status === 'delivered' ? 'status-delivered' : ''}">
+                        <div class="order-status-badge ${statusClass}">${statusText}</div>
+                        <div class="order-header"><span>رقم الطلب: ${order.id}</span><span>${order.date}</span></div>
+                        <p><strong>العميل:</strong> ${order.customer.name}</p>
+                        <p><strong>الهاتف:</strong> ${order.customer.phone}</p>
+                        <p><strong>العنوان:</strong> ${order.customer.address}</p>
+                        <p style="margin-top:8px;color:#ddd;"><strong>المنتجات:</strong> ${itemsText}</p>
+                        <p style="color:var(--gold-light);font-weight:800;font-size:1.1rem;margin:8px 0;">إجمالي المنتجات: ${order.total} ج.م</p>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                            <button class="btn btn-whatsapp" onclick="openWhatsApp('${phone}','${confirmMessage}')"><i class="fa-brands fa-whatsapp"></i> تواصل واتساب</button>
+                            ${order.status === 'pending' ? `<button class="btn btn-confirm" onclick="changeOrderStatus(${realIndex},'confirmed')">تم تأكيد الطلب</button>` : ''}
+                            ${order.status !== 'delivered' ? `<button class="btn btn-matched" onclick="changeOrderStatus(${realIndex},'delivered')">تم الاستلام</button>` : ''}
+                            <button class="btn btn-danger" onclick="deleteOrder(${realIndex})"><i class="fa-solid fa-trash"></i> حذف</button>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
         renderCategories();
         renderProducts();
         updateCartBadge();
