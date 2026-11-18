@@ -740,9 +740,9 @@
 
     <div class="categories-bar" id="categories-bar"></div>
 
-    <main class="container" id="products-section">
+    <div class="container" id="products-section">
         <div class="products-grid" id="products-grid"></div>
-    </main>
+    </div>
 
     <footer>
         <div class="footer-brand">TRENDIX</div>
@@ -1073,7 +1073,9 @@
 
         function renderProducts() {
             const grid = document.getElementById('products-grid');
-            const filtered = currentFilter === 'الكل' ? products : products.filter(p => p.category === currentFilter);
+            const filtered = currentFilter === 'الكل'
+                ? products
+                : products.filter(p => p.category === currentFilter);
 
             if (filtered.length === 0) {
                 grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد منتجات في هذا القسم حالياً.</p>`;
