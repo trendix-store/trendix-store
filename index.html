@@ -976,13 +976,14 @@
         ];
 
         let categories = defaultCategories;
-        let products = defaultProducts;
+        let products = [];
         let cart = JSON.parse(localStorage.getItem('trendix_cart')) || [];
         let orders = [];
         let currentFilter = 'الكل';
         let currentOrderFilter = 'all';
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
+        let productsLoaded = false;
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
@@ -1018,10 +1019,9 @@
                 }));
             }
 
+            productsLoaded = true;
             renderCategories();
             renderProducts();
-            updateCartBadge();
-            loadSharedData().catch(error => console.error('Supabase load error:', error));
         }
 
         async function saveData() {
@@ -1105,6 +1105,10 @@
 
         function renderProducts() {
             const grid = document.getElementById('products-grid');
+            if (!productsLoaded) {
+                grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل المنتجات...</p>';
+                return;
+            }
             const filtered = products.filter(p => {
                 const categoryMatch = currentFilter === 'الكل' || p.category === currentFilter;
                 const genderMatch = currentGenderFilter === 'all' || p.gender === 'مشترك' ||
