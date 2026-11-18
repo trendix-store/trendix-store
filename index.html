@@ -984,7 +984,7 @@
         let currentOrderFilter = 'all';
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
-        let productsLoaded = savedCache.length > 0;
+        let productsLoaded = true;
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
