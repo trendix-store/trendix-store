@@ -1066,7 +1066,9 @@
 
             const select = document.getElementById('prod-category');
             if (select) {
+                const selectedCategory = select.value;
                 select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+                if (selectedCategory && categories.includes(selectedCategory)) select.value = selectedCategory;
             }
 
             const adminList = document.getElementById('admin-categories-list');
