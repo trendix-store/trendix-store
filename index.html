@@ -1161,30 +1161,38 @@
             renderCartItems();
         }
 
-        function submitOrder(e) {
+        async function submitOrder(e) {
             e.preventDefault();
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
             const address = document.getElementById('cust-address').value.trim();
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-
             const newOrder = {
                 id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
                 date: new Date().toLocaleString('ar-EG'),
                 customer: { name, phone, address },
                 items: [...cart],
-                total: total,
+                total,
                 status: 'pending'
             };
 
+            const { error } = await trendixDb.from('trendix_orders').insert({
+                id: newOrder.id,
+                date: newOrder.date,
+                customer: newOrder.customer,
+                items: newOrder.items,
+                total: newOrder.total,
+                status: newOrder.status
+            });
+            if (error) { alert('تعذر حفظ الطلب: ' + error.message); return; }
+
             orders.unshift(newOrder);
             cart = [];
-            saveData();
+            localStorage.setItem('trendix_cart', JSON.stringify(cart));
             updateCartBadge();
             document.getElementById('order-form').reset();
             closeModal('cart-modal');
-
-            alert(`شكراً لك يا ${name}!\nتم استلام طلبك بنجاح برقم (${newOrder.id}).\nسنتواصل معك عبر الواتساب قريباً لتأكيد الطلب ومصاريف الشحن.`);
+            alert(`شكراً لك يا ${name}! تم استلام طلبك بنجاح برقم (${newOrder.id}).`);
         }
 
         function openAdminAuth() {
@@ -1225,33 +1233,33 @@
             if (activeBtn) activeBtn.className = 'btn btn-gold';
         }
 
-        function addCategory() {
+        async function addCategory() {
             const input = document.getElementById('new-category-input');
             const val = input.value.trim();
             if (!val) return;
             if (!categories.includes(val)) {
                 categories.push(val);
-                saveData();
-                renderCategories();
+                const { error } = await trendixDb.from('trendix_categories').insert({ name: val });
+                if (error) { alert('تعذر حفظ الصنف: ' + error.message); return; }
+                await loadSharedData();
                 input.value = '';
             } else {
                 alert('هذا الصنف موجود بالفعل!');
             }
         }
 
-        function deleteCategory(index) {
+        async function deleteCategory(index) {
             if (categories.length <= 1) {
                 alert('يجب أن يظل هناك صنف واحد على الأقل في المتجر.');
                 return;
             }
-            if (confirm(`هل أنت متأكد من حذف صنف "${categories[index]}"؟`)) {
+            const name = categories[index];
+            if (confirm(`هل أنت متأكد من حذف صنف "${name}"؟`)) {
+                const { error } = await trendixDb.from('trendix_categories').delete().eq('name', name);
+                if (error) { alert('تعذر حذف الصنف: ' + error.message); return; }
                 categories.splice(index, 1);
-                if (currentFilter !== 'الكل' && !categories.includes(currentFilter)) {
-                    currentFilter = 'الكل';
-                }
-                saveData();
-                renderCategories();
-                renderProducts();
+                if (currentFilter !== 'الكل' && !categories.includes(currentFilter)) currentFilter = 'الكل';
+                await loadSharedData();
             }
         }
 
@@ -1265,81 +1273,32 @@
             reader.readAsDataURL(file);
         }
 
-        function saveProduct(e) {
+        async function saveProduct(e) {
             e.preventDefault();
             const editId = document.getElementById('edit-prod-id').value;
             const name = document.getElementById('prod-name').value.trim();
             const category = document.getElementById('prod-category').value;
             const price = Number(document.getElementById('prod-price').value);
-            const oldPrice = document.getElementById('prod-old-price').value ? Number(document.getElementById('prod-old-price').value) : "";
+            const oldPrice = document.getElementById('prod-old-price').value ? Number(document.getElementById('prod-old-price').value) : null;
             const image = document.getElementById('prod-img-url').value.trim() || FALLBACK_LOGO;
             const desc = document.getElementById('prod-desc').value.trim();
+            const row = { id: editId ? Number(editId) : Date.now(), name, category, price, old_price: oldPrice, image, description: desc };
 
-            if (editId) {
-                const prod = products.find(p => p.id == editId);
-                if (prod) {
-                    prod.name = name;
-                    prod.category = category;
-                    prod.price = price;
-                    prod.oldPrice = oldPrice;
-                    prod.image = image;
-                    prod.desc = desc;
-                }
-                alert('تم تحديث المنتج بنجاح!');
-            } else {
-                const newProd = {
-                    id: Date.now(),
-                    name,
-                    category,
-                    price,
-                    oldPrice,
-                    image,
-                    desc
-                };
-                products.unshift(newProd);
-                alert('تم إضافة المنتج بنجاح!');
-            }
+            const { error } = await trendixDb.from('trendix_products').upsert(row);
+            if (error) { alert('تعذر حفظ المنتج: ' + error.message); return; }
 
-            saveData();
-            renderProducts();
+            await loadSharedData();
             renderProductsAdmin();
             resetProductForm();
+            alert(editId ? 'تم تحديث المنتج بنجاح!' : 'تم إضافة المنتج بنجاح!');
         }
 
-        function editProduct(id) {
-            const prod = products.find(p => p.id == id);
-            if (!prod) return;
-
-            document.getElementById('edit-prod-id').value = prod.id;
-            document.getElementById('prod-name').value = prod.name;
-            document.getElementById('prod-category').value = prod.category;
-            document.getElementById('prod-price').value = prod.price;
-            document.getElementById('prod-old-price').value = prod.oldPrice || '';
-            document.getElementById('prod-img-url').value = prod.image;
-            document.getElementById('prod-desc').value = prod.desc || '';
-
-            document.getElementById('form-title').innerText = '2. تعديل المنتج المحدد';
-            document.getElementById('save-prod-btn').innerHTML = '<i class="fa-solid fa-save"></i> حفظ التعديلات';
-            document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
-
-            document.getElementById('form-title').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function resetProductForm() {
-            document.getElementById('product-form').reset();
-            document.getElementById('edit-prod-id').value = '';
-            document.getElementById('form-title').innerText = '2. إضافة منتج جديد';
-            document.getElementById('save-prod-btn').innerHTML = '<i class="fa-solid fa-save"></i> حفظ ونشر المنتج';
-            document.getElementById('cancel-edit-btn').style.display = 'none';
-        }
-
-        function deleteProduct(id) {
-            if (confirm('هل تريد حذف هذا المنتج نهائياً؟')) {
-                products = products.filter(p => p.id !== id);
-                saveData();
-                renderProducts();
-                renderProductsAdmin();
-            }
+        async function deleteProduct(id) {
+            if (!confirm('هل تريد حذف هذا المنتج نهائياً؟')) return;
+            const { error } = await trendixDb.from('trendix_products').delete().eq('id', id);
+            if (error) { alert('تعذر حذف المنتج: ' + error.message); return; }
+            await loadSharedData();
+            renderProductsAdmin();
         }
 
         function renderProductsAdmin() {
@@ -1377,98 +1336,23 @@
             renderOrdersAdmin();
         }
 
-        function changeOrderStatus(index, newStatus) {
-            orders[index].status = newStatus;
-            saveData();
+        async function changeOrderStatus(index, newStatus) {
+            const order = orders[index];
+            if (!order) return;
+            const { error } = await trendixDb.from('trendix_orders').update({ status: newStatus }).eq('id', order.id);
+            if (error) { alert('تعذر تحديث حالة الطلب: ' + error.message); return; }
+            order.status = newStatus;
             renderOrdersAdmin();
         }
 
-        function renderOrdersAdmin() {
-            document.getElementById('orders-count').innerText = orders.length;
-            const list = document.getElementById('orders-list');
-
-            let filteredOrders = orders;
-            if (currentOrderFilter !== 'all') {
-                filteredOrders = orders.filter(ord => ord.status === currentOrderFilter);
-            }
-
-            if (filteredOrders.length === 0) {
-                list.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 25px;">لا توجد طلبات في هذا القسم حالياً.</p>`;
-                return;
-            }
-
-            list.innerHTML = filteredOrders.map((ord) => {
-                const realIdx = orders.findIndex(o => o.id === ord.id);
-                const itemsText = ord.items.map(i => `${i.name} (×${i.qty})`).join(' + ');
-                let waPhone = ord.customer.phone.replace(/\D/g, '');
-                if (waPhone.startsWith('01')) waPhone = '2' + waPhone;
-
-                const confirmMsg = encodeURIComponent(
-                    `أهلاً بك يا ${ord.customer.name}، تم استلام طلبك من *TRENDIX* بنجاح!\n` +
-                    `تفاصيل الطلب: ${itemsText}\n` +
-                    `إجمالي المنتجات: ${ord.total} ج.م + مصاريف الشحن حسب عنوانك (${ord.customer.address}).\n` +
-                    `برجاء التأكيد لإرسال الأوردر فوراً.`
-                );
-
-                let statusClass = '';
-                let badgeText = '';
-                if (ord.status === 'confirmed') {
-                    statusClass = 'status-confirmed';
-                    badgeText = '✅ تم التأكيد';
-                } else if (ord.status === 'delivered') {
-                    statusClass = 'status-delivered';
-                    badgeText = '📦 تم الاستلام';
-                } else {
-                    statusClass = '';
-                    badgeText = '⏳ قيد الانتظار';
-                }
-
-                return `
-                    <div class="order-card ${statusClass}">
-                        <div class="order-status-badge ${ord.status === 'confirmed' ? 'badge-confirmed' : ord.status === 'delivered' ? 'badge-delivered' : 'badge-pending'}">
-                            ${badgeText}
-                        </div>
-                        <div class="order-header">
-                            <span>رقم الطلب: ${ord.id}</span>
-                            <span>${ord.date}</span>
-                        </div>
-                        <p><strong>العميل:</strong> ${ord.customer.name}</p>
-                        <p><strong>الهاتف:</strong> ${ord.customer.phone}</p>
-                        <p><strong>العنوان:</strong> ${ord.customer.address}</p>
-                        <p style="margin-top: 8px; color: #ddd;"><strong>المنتجات:</strong> ${itemsText}</p>
-                        <p style="color: var(--gold-light); font-weight: 800; font-size: 1.1rem; margin: 8px 0;">إجمالي المنتجات: ${ord.total} ج.م</p>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center;">
-                            <button class="btn btn-whatsapp" onclick="openWhatsApp('${waPhone}', '${confirmMsg}')">
-                                <i class="fa-brands fa-whatsapp"></i> تواصل واتساب
-                            </button>
-
-                            ${ord.status === 'pending' ? `
-                                <button class="btn btn-confirm" style="padding: 6px 12px; font-size: 0.85rem;" onclick="changeOrderStatus(${realIdx}, 'confirmed')">
-                                    <i class="fa-solid fa-check"></i> تم تأكيد الطلب
-                                </button>
-                            ` : ''}
-
-                            ${ord.status !== 'delivered' ? `
-                                <button class="btn btn-matched" style="padding: 6px 12px; font-size: 0.85rem;" onclick="changeOrderStatus(${realIdx}, 'delivered')">
-                                    <i class="fa-solid fa-box-open"></i> تم الاستلام
-                                </button>
-                            ` : ''}
-
-                            <button class="btn btn-danger" onclick="deleteOrder(${realIdx})">
-                                <i class="fa-solid fa-trash"></i> حذف
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function deleteOrder(index) {
-            if (confirm('هل تريد حذف هذا الطلب نهائياً؟')) {
-                orders.splice(index, 1);
-                saveData();
-                renderOrdersAdmin();
-            }
+        async function deleteOrder(index) {
+            if (!confirm('هل تريد حذف هذا الطلب نهائياً؟')) return;
+            const order = orders[index];
+            if (!order) return;
+            const { error } = await trendixDb.from('trendix_orders').delete().eq('id', order.id);
+            if (error) { alert('تعذر حذف الطلب: ' + error.message); return; }
+            orders.splice(index, 1);
+            renderOrdersAdmin();
         }
 
         function closeModal(id) {
