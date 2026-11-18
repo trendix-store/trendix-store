@@ -754,16 +754,26 @@
         <p style="color: var(--text-muted);">تابعنا على صفحاتنا الرسمية وتواصل معنا مباشرة لأي استفسار</p>
 
         <div class="social-links">
-            <!-- تم إخفاء روابط التواصل الاجتماعية من الفوتر بالكامل -->
+            <a href="https://www.facebook.com/share/1DPK6cufkR/" target="_blank" rel="noopener" class="social-btn social-fb">
+                <i class="fa-brands fa-facebook-f"></i> صفحتنا على فيسبوك
+            </a>
+            <a href="https://www.instagram.com/trendix.1111?rpxt=MTN2a28xbWh2c2tn" target="_blank" rel="noopener" class="social-btn social-ig">
+                <i class="fa-brands fa-instagram"></i> حسابنا على إنستجرام
+            </a>
         </div>
 
         <div class="phones-box">
+           
         </div>
 
         <div class="copyright">
             تم التصميم والتطوير بواسطة <strong>Eng. Mina Talaat</strong>
         </div>
     </footer>
+
+    <a href="https://wa.me/201050708955" target="_blank" rel="noopener" class="floating-wa" title="تواصل معنا عبر واتساب">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 
     <div class="modal" id="cart-modal">
         <div class="modal-content">
@@ -935,40 +945,11 @@
         const trendixDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
         const defaultCategories = ["ساعات", "أساور", "سلاسل", "نظارات"];
-        const defaultProducts = [
-            {
-                id: 1794986850144,
-                name: "ساعة Patek رجالي",
-                category: "ساعات",
-                price: 420,
-                oldPrice: "",
-                image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80",
-                desc: "ساعة رجالي أنيقة بتصميم فاخر وجودة عالية."
-            },
-            {
-                id: 1794987500165,
-                name: "ساعة أوديمار Piguet رجالي",
-                category: "ساعات",
-                price: 400,
-                oldPrice: "",
-                image: "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80",
-                desc: "ساعة رجالي عصرية بتصميم مميز يناسب الإطلالات المختلفة."
-            },
-            {
-                id: 1794987798802,
-                name: "ساعة معدن حريمي ماركات مع إنسيال",
-                category: "ساعات",
-                price: 380,
-                oldPrice: "",
-                image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80",
-                desc: "ساعة معدن حريمي مميزة مع إنسيال أنيق."
-            }
-        ];
+        const defaultProducts = [];
 
         let categories = defaultCategories;
         let savedCache = [];
         let products = [];
-
         let orders = [];
         let cart = JSON.parse(localStorage.getItem('trendix_cart') || '[]');
         let currentFilter = 'الكل';
@@ -1545,21 +1526,69 @@
         let activeDetailProductId = null;
         let activeGalleryIndex = 0;
 
-        async function handleMultipleImageUpload(event) {
-            const files = Array.from(event.target.files || []);
-            if (!files.length) return;
+        function openProductDetail(id) {
+            const product = products.find(item => String(item.id) === String(id));
+            if (!product) return;
+            activeDetailProductId = product.id;
+            activeGalleryIndex = 0;
+            renderProductDetail();
+            document.getElementById('product-detail-modal').classList.add('active');
+        }
 
-            const oversized = files.find(file => file.size > 2 * 1024 * 1024);
-            if (oversized) {
-                alert(`الصورة "${oversized.name}" أكبر من 2 ميجابايت. يرجى ضغطها أولاً أو استخدام رابط صورة.`);
-                event.target.value = '';
-                return;
+        function renderProductDetail() {
+            const product = products.find(item => String(item.id) === String(activeDetailProductId));
+            if (!product) return;
+            const images = product.images?.length ? product.images : splitProductImages(product.image);
+            activeGalleryIndex = Math.max(0, Math.min(activeGalleryIndex, images.length - 1));
+            const dots = images.map((_, index) => `<span class="gallery-dot ${index === activeGalleryIndex ? 'active' : ''}"></span>`).join('');
+
+            document.getElementById('product-detail-content').innerHTML = `
+                <div class="detail-layout">
+                    <div class="detail-gallery" id="detail-gallery" ontouchstart="galleryTouchStart(event)" ontouchend="galleryTouchEnd(event)">
+                        <img src="${images[activeGalleryIndex]}" alt="${product.name}" onerror="this.src='${FALLBACK_LOGO}'">
+                        ${images.length > 1 ? `<button class="gallery-arrow prev" type="button" onclick="changeDetailImage(1)"><i class="fa-solid fa-chevron-right"></i></button><button class="gallery-arrow next" type="button" onclick="changeDetailImage(-1)"><i class="fa-solid fa-chevron-left"></i></button><div class="gallery-dots">${dots}</div>` : ''}
+                    </div>
+                    <div class="detail-info">
+                        <h2>${product.name}</h2>
+                        <p style="color:var(--text-muted);margin-bottom:14px;">${product.desc || ''}</p>
+                        <p style="color:var(--gold-light);font-size:1.35rem;font-weight:900;margin-bottom:16px;">${product.price} ج.م ${product.oldPrice ? `<span class="old-price">${product.oldPrice} ج.م</span>` : ''}</p>
+                        <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="addToCart(${product.id});closeModal('product-detail-modal')"><i class="fa-solid fa-cart-plus"></i> أضف للسلة</button>
+                    </div>
+                </div>`;
+        }
+
+        function changeDetailImage(direction) {
+            const product = products.find(item => String(item.id) === String(activeDetailProductId));
+            if (!product) return;
+            const images = product.images?.length ? product.images : splitProductImages(product.image);
+            activeGalleryIndex = (activeGalleryIndex + direction + images.length) % images.length;
+            renderProductDetail();
+        }
+
+        let galleryTouchX = 0;
+        function galleryTouchStart(event) { galleryTouchX = event.changedTouches[0].screenX; }
+        function galleryTouchEnd(event) {
+            const distance = event.changedTouches[0].screenX - galleryTouchX;
+            if (Math.abs(distance) > 45) changeDetailImage(distance < 0 ? -1 : 1);
+        }
+
+        localStorage.setItem('trendix_products_cache', JSON.stringify(products));
+
+        function normalizeEgyptPhone(value) {
+            let phone = String(value || '').replace(/\D/g, '');
+            if (!phone) return '';
+
+            if (phone.startsWith('20')) {
+                return phone;
             }
-
-            try {
-                const dataUrls = await Promise.all(files.map(file => new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error(`تعذر قراءة الصورة: ${file.name}`));
-                    reader.readAsDataURL(file);
-                })));
+            if (phone.startsWith('0')) {
+                return '20' + phone.substring(1);
+            }
+            if (/^(10|11|12|15)/.test(phone)) {
+                return '20' + phone;
+            }
+            return phone;
+        }
+    </script>
+</body>
+</html>
