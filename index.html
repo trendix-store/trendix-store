@@ -897,7 +897,8 @@
                         <label>صور المنتج (الصورة الأساسية ثم صور إضافية، رابط واحد في كل سطر) *</label>
                         <textarea id="prod-img-url" class="form-control" rows="4" placeholder="ضع رابط الصورة الأساسية في السطر الأول&#10;ضع روابط الصور الإضافية في أسطر أخرى"></textarea>
                         <input type="file" id="prod-img-file" accept="image/*" multiple class="form-control" style="margin-top: 8px;" onchange="handleMultipleImageUpload(event)">
-                        <small style="color:var(--text-muted);">يمكنك اختيار عدة صور للجوال، أو وضع روابط الصور أسطرًا منفصلة.</small>
+                        <div id="prod-images-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"></div>
+                        <small style="color:var(--text-muted);">اختر عدة صور للجوال دفعة واحدة، أو ضع روابط الصور أسطرًا منفصلة.</small>
                     </div>
                     <div class="form-group">
                         <label>وصف مختصر للمنتج</label>
@@ -1565,6 +1566,7 @@
             document.getElementById('prod-price').value = product.price;
             document.getElementById('prod-old-price').value = product.oldPrice || '';
             document.getElementById('prod-img-url').value = (product.images?.length ? product.images : splitProductImages(product.image)).join('\n');
+            renderProductImagesPreview(splitProductImages(document.getElementById('prod-img-url').value).filter(url => url !== FALLBACK_LOGO));
             document.getElementById('prod-desc').value = product.desc || '';
 
             document.getElementById('form-title').textContent = '2. تعديل المنتج المحدد';
@@ -1579,6 +1581,7 @@
             document.getElementById('form-title').textContent = '2. إضافة منتج جديد';
             document.getElementById('save-prod-btn').innerHTML = '<i class="fa-solid fa-save"></i> حفظ ونشر المنتج';
             document.getElementById('cancel-edit-btn').style.display = 'none';
+            document.getElementById('prod-images-preview').innerHTML = '';
         }
 
         let activeDetailProductId = null;
@@ -1597,12 +1600,42 @@
                 }
 
                 const urlField = document.getElementById('prod-img-url');
-                urlField.value = uniqueDataUrls.join('\n');
+                const existingUrls = urlField.value.split('\n').map(value => value.trim()).filter(Boolean);
+                const combinedUrls = [...new Set([...existingUrls, ...uniqueDataUrls])];
+
+                urlField.value = combinedUrls.join('\n');
                 urlField.dispatchEvent(new Event('input', { bubbles: true }));
+
+                renderProductImagesPreview(combinedUrls);
             } catch (error) {
                 alert(error.message);
             } finally {
                 event.target.value = '';
+            }
+        }
+
+        function renderProductImagesPreview(urls) {
+            const container = document.getElementById('prod-images-preview');
+            container.innerHTML = urls.map(url => `
+                <div class="image-preview" style="position:relative; width:calc(25% - 10px);">
+                    <img src="${url}" alt="معاينة الصورة" style="width:100%; border-radius:8px; object-fit:cover;">
+                    <button type="button" class="btn btn-danger" style="position:absolute; top:5px; right:5px; padding:4px 8px; border-radius:50%;" onclick="removeImagePreview(this)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function removeImagePreview(button) {
+            const previewContainer = document.getElementById('prod-images-preview');
+            const imagePreview = button.closest('.image-preview');
+            if (imagePreview) {
+                const imgSrc = imagePreview.querySelector('img').src;
+                const urlField = document.getElementById('prod-img-url');
+                const currentUrls = urlField.value.split('\n').filter(Boolean);
+                const newUrls = currentUrls.filter(url => url !== imgSrc);
+                urlField.value = newUrls.join('\n');
+                imagePreview.remove();
             }
         }
 
