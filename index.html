@@ -976,14 +976,14 @@
         ];
 
         let categories = defaultCategories;
-        let products = [];
-        let cart = JSON.parse(localStorage.getItem('trendix_cart')) || [];
+        let savedCache = JSON.parse(localStorage.getItem('trendix_products_cache') || '[]');
+        let products = savedCache.length ? savedCache : [];
         let orders = [];
         let currentFilter = 'الكل';
         let currentOrderFilter = 'all';
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
-        let productsLoaded = false;
+        let productsLoaded = savedCache.length > 0;
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
@@ -1588,6 +1588,8 @@
             const distance = event.changedTouches[0].screenX - galleryTouchX;
             if (Math.abs(distance) > 45) changeDetailImage(distance < 0 ? -1 : 1);
         }
+
+        localStorage.setItem('trendix_products_cache', JSON.stringify(products));
     </script>
 </body>
 </html>
