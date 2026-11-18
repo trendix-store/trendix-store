@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -1604,6 +1604,15 @@
             } finally {
                 event.target.value = '';
             }
+        }
+
+        function normalizeEgyptPhone(value) {
+            const digits = String(value || '').replace(/\D/g, '');
+            if (!digits) return '';
+            if (digits.startsWith('20')) return digits;
+            if (digits.startsWith('0')) return '20' + digits.substring(1);
+            if (/^(10|11|12|15)/.test(digits)) return '20' + digits;
+            return digits;
         }
 
         function compressPhoneImage(file) {
