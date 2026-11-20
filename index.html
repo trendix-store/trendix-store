@@ -1102,7 +1102,7 @@
         function filterGender(gender) {
             currentGenderFilter = gender;
             document.querySelectorAll('#gender-filter-bar .cat-btn').forEach(button => button.classList.remove('active'));
-            if (typeof event !== 'undefined' && event?.target) event.target.classList.add('active');
+            event.target.classList.add('active');
             renderProducts();
         }
 
@@ -1677,8 +1677,7 @@
                             quality -= 0.1;
                             dataUrl = canvas.toDataURL('image/jpeg', quality);
                         }
-
-                        resolve(dataUrl);
+                       
                     };
                     image.src = reader.result
                 };
@@ -1689,8 +1688,6 @@
         function openProductDetail(id) {
             const product = products.find(item => String(item.id) === String(id));
             if (!product) return;
-           
-
             activeDetailProductId = product.id;
             activeGalleryIndex = 0;
             renderProductDetail();
