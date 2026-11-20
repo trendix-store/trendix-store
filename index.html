@@ -746,23 +746,7 @@
     </div>
 
     <div class="container" id="products-section">
-        <div class="products-grid" id="products-grid">
-            <div class="product-card">
-                <div class="product-img-wrap"><img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80" alt="ساعة Patek رجالي"></div>
-                <div class="product-info"><h3 class="product-title">ساعة Patek رجالي</h3><p class="product-desc">ساعة رجالي أنيقة بتصميم فاخر وجودة عالية.</p><span class="product-price">420 ج.م</span></div>
-            </div>
-            <div class="product-card">
-                <div class="product-img-wrap"><img src="https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80" alt="ساعة أوديمار Piguet رجالي"></div>
-                <div class="product-info"><h3 class="product-title">ساعة أوديمار Piguet رجالي</h3><p class="product-desc">ساعة رجالي عصرية بتصميم مميز يناسب الإطلالات المختلفة.</p><span class="product-price">400 ج.م</span></div>
-            </div>
-            <div class="product-card">
-                <div class="product-img-wrap"><img src="https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80" alt="ساعة معدن حريمي ماركات مع إنسيال"></div>
-                <div class="product-info"><h3 class="product-title">ساعة معدن حريمي ماركات مع إنسيال</h3><p class="product-desc">ساعة معدن حريمي مميزة مع إنسيال أنيق.</p><span class="product-price">380 ج.م</span></div>
-            </div>
-        </div>
-        <button id="load-more-btn" class="btn btn-gold" onclick="loadMoreProducts()" style="display:block;margin:25px auto 0;border-radius:30px;justify-content:center;min-width:180px;">
-            <i class="fa-solid fa-chevron-down"></i> عرض المزيد
-        </button>
+        <div class="products-grid" id="products-grid"></div>
     </div>
 
     <footer>
@@ -952,27 +936,17 @@
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
-    <script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const ADMIN_PASS = "TR$11*2026!";
         const FALLBACK_LOGO = "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80";
 
         const SUPABASE_URL = "https://wusiwphxjqwnmwkxcqac.supabase.co";
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_tCPv7dfMWzFZQYxTMRv2Bg_9HlyCtgt";
-        let trendixDb = null;
-
-        function initializeTrendixDatabase() {
-            if (window.supabase) {
-                trendixDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-                if (typeof loadSharedData === 'function') loadSharedData().catch(error => console.error('Supabase load error:', error));
-            }
-        }
+        const trendixDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
         const defaultCategories = ["ساعات", "أساور", "سلاسل", "نظارات"];
-        let categories = defaultCategories;
-        let savedCache = [];
-
-        let products = [
+        const defaultProducts = [
             {
                 id: 1794986850144,
                 name: "ساعة Patek رجالي",
@@ -980,9 +954,7 @@
                 price: 420,
                 oldPrice: "",
                 image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80"],
-                desc: "ساعة رجالي أنيقة بتصميم فاخر وجودة عالية.",
-                gender: "مشترك"
+                desc: "ساعة رجالي أنيقة بتصميم فاخر وجودة عالية."
             },
             {
                 id: 1794987500165,
@@ -991,9 +963,7 @@
                 price: 400,
                 oldPrice: "",
                 image: "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80"],
-                desc: "ساعة رجالي عصرية بتصميم مميز يناسب الإطلالات المختلفة.",
-                gender: "مشترك"
+                desc: "ساعة رجالي عصرية بتصميم مميز يناسب الإطلالات المختلفة."
             },
             {
                 id: 1794987798802,
@@ -1002,22 +972,13 @@
                 price: 380,
                 oldPrice: "",
                 image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80"],
-                desc: "ساعة معدن حريمي مميزة مع إنسيال أنيق.",
-                gender: "مشترك"
+                desc: "ساعة معدن حريمي مميزة مع إنسيال أنيق."
             }
         ];
-        try {
-            const cachedProducts = JSON.parse(localStorage.getItem('trendix_products_cache') || '[]');
-            if (Array.isArray(cachedProducts) && cachedProducts.length) {
-                products = cachedProducts.map(product => ({
-                    ...product,
-                    images: splitProductImages(product.image || product.images?.join('\n'))
-                }));
-            }
-        } catch (error) {
-            console.warn('تعذر قراءة المنتجات المخزنة:', error);
-        }
+
+        let categories = defaultCategories;
+        let savedCache = [];
+        let products = [];
 
         let orders = [];
         let cart = JSON.parse(localStorage.getItem('trendix_cart') || '[]');
@@ -1026,7 +987,6 @@
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
         let productsLoaded = true;
-        let visibleProductsLimit = 3;
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
@@ -1135,14 +1095,12 @@
 
         function filterProducts(cat) {
             currentFilter = cat;
-            visibleProductsLimit = 3;
             renderCategories();
             renderProducts();
         }
 
         function filterGender(gender) {
             currentGenderFilter = gender;
-            visibleProductsLimit = 3;
             document.querySelectorAll('#gender-filter-bar .cat-btn').forEach(button => button.classList.remove('active'));
             event.target.classList.add('active');
             renderProducts();
@@ -1162,7 +1120,7 @@
                 return categoryMatch && genderMatch;
             });
 
-            const renderedProducts = filtered.slice(0, visibleProductsLimit);
+            const renderedProducts = productsLoaded ? filtered : filtered.slice(0, 6);
 
             if (filtered.length === 0) {
                 grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد منتجات في هذا القسم حالياً.</p>`;
@@ -1204,11 +1162,6 @@
                     </div>
                 `;
             }).join('');
-
-            const loadMoreBtn = document.getElementById('load-more-btn');
-            if (loadMoreBtn) {
-                loadMoreBtn.style.display = 'block';
-            }
         }
 
         function shareProductWhatsApp(name, price) {
@@ -1598,8 +1551,7 @@
         renderCategories();
         renderProducts();
         updateCartBadge();
-        window.addEventListener('load', initializeTrendixDatabase, { once: true });
-
+        loadSharedData().catch(error => console.error('Supabase load error:', error));
 
         function editProduct(id) {
             const product = products.find(item => String(item.id) === String(id));
@@ -1642,8 +1594,6 @@
             try {
                 const dataUrls = await Promise.all(files.map(file => compressPhoneImage(file)));
                 const uniqueDataUrls = [...new Set(dataUrls)];
-
-               
 
                 if (!uniqueDataUrls.length) {
                     throw new Error('لم يتم تجهيز أي صورة صالحة');
@@ -1693,8 +1643,6 @@
             const digits = String(value || '').replace(/\D/g, '');
             if (!digits) return '';
             if (digits.startsWith('20')) return digits;
-           
-
             if (digits.startsWith('0')) return '20' + digits.substring(1);
             if (/^(10|11|12|15)/.test(digits)) return '20' + digits;
             return digits;
@@ -1723,15 +1671,13 @@
                         context.fillRect(0, 0, canvas.width, canvas.height);
                         context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-
                         let quality = 0.72;
                         let dataUrl = canvas.toDataURL('image/jpeg', quality);
                         while (dataUrl.length > 500000 && quality > 0.45) {
-
                             quality -= 0.1;
                             dataUrl = canvas.toDataURL('image/jpeg', quality);
                         }
-                        resolve(dataUrl);
+                       
                     };
                     image.src = reader.result
                 };
@@ -1782,11 +1728,6 @@
         function galleryTouchEnd(event) {
             const distance = event.changedTouches[0].screenX - galleryTouchX;
             if (Math.abs(distance) > 45) changeDetailImage(distance < 0 ? -1 : 1);
-        }
-
-        function loadMoreProducts() {
-            visibleProductsLimit += 3;
-            renderProducts();
         }
     </script>
 </body>
