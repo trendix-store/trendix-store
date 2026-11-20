@@ -746,7 +746,20 @@
     </div>
 
     <div class="container" id="products-section">
-        <div class="products-grid" id="products-grid"></div>
+        <div class="products-grid" id="products-grid">
+            <div class="product-card">
+                <div class="product-img-wrap"><img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80" alt="ساعة Patek رجالي"></div>
+                <div class="product-info"><h3 class="product-title">ساعة Patek رجالي</h3><p class="product-desc">ساعة رجالي أنيقة بتصميم فاخر وجودة عالية.</p><span class="product-price">420 ج.م</span></div>
+            </div>
+            <div class="product-card">
+                <div class="product-img-wrap"><img src="https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80" alt="ساعة أوديمار Piguet رجالي"></div>
+                <div class="product-info"><h3 class="product-title">ساعة أوديمار Piguet رجالي</h3><p class="product-desc">ساعة رجالي عصرية بتصميم مميز يناسب الإطلالات المختلفة.</p><span class="product-price">400 ج.م</span></div>
+            </div>
+            <div class="product-card">
+                <div class="product-img-wrap"><img src="https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80" alt="ساعة معدن حريمي ماركات مع إنسيال"></div>
+                <div class="product-info"><h3 class="product-title">ساعة معدن حريمي ماركات مع إنسيال</h3><p class="product-desc">ساعة معدن حريمي مميزة مع إنسيال أنيق.</p><span class="product-price">380 ج.م</span></div>
+            </div>
+        </div>
         <button id="load-more-btn" class="btn btn-gold" onclick="loadMoreProducts()" style="display:none;margin:25px auto 0;border-radius:30px;justify-content:center;min-width:180px;">
             <i class="fa-solid fa-chevron-down"></i> عرض المزيد
         </button>
@@ -952,7 +965,41 @@
         let categories = defaultCategories;
         let savedCache = [];
 
-        let products = [];
+        let products = [
+            {
+                id: 1794986850144,
+                name: "ساعة Patek رجالي",
+                category: "ساعات",
+                price: 420,
+                oldPrice: "",
+                image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80",
+                images: ["https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80"],
+                desc: "ساعة رجالي أنيقة بتصميم فاخر وجودة عالية.",
+                gender: "مشترك"
+            },
+            {
+                id: 1794987500165,
+                name: "ساعة أوديمار Piguet رجالي",
+                category: "ساعات",
+                price: 400,
+                oldPrice: "",
+                image: "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80",
+                images: ["https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80"],
+                desc: "ساعة رجالي عصرية بتصميم مميز يناسب الإطلالات المختلفة.",
+                gender: "مشترك"
+            },
+            {
+                id: 1794987798802,
+                name: "ساعة معدن حريمي ماركات مع إنسيال",
+                category: "ساعات",
+                price: 380,
+                oldPrice: "",
+                image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80",
+                images: ["https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80"],
+                desc: "ساعة معدن حريمي مميزة مع إنسيال أنيق.",
+                gender: "مشترك"
+            }
+        ];
         try {
             const cachedProducts = JSON.parse(localStorage.getItem('trendix_products_cache') || '[]');
             if (Array.isArray(cachedProducts) && cachedProducts.length) {
@@ -1636,6 +1683,8 @@
             const digits = String(value || '').replace(/\D/g, '');
             if (!digits) return '';
             if (digits.startsWith('20')) return digits;
+           
+
             if (digits.startsWith('0')) return '20' + digits.substring(1);
             if (/^(10|11|12|15)/.test(digits)) return '20' + digits;
             return digits;
