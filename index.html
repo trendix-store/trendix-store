@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -520,32 +520,6 @@
             text-decoration: none;
         }
 
-        .gallery-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 34px;
-            height: 34px;
-            border: 1px solid rgba(212,175,55,.7);
-            border-radius: 50%;
-            background: rgba(0,0,0,.75);
-            color: var(--gold-light);
-            cursor: pointer;
-            z-index: 3;
-        }
-        .gallery-arrow.prev { right: 8px; }
-        .gallery-arrow.next { left: 8px; }
-        .gallery-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display:flex; gap:5px; z-index:3; }
-        .gallery-dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); }
-        .gallery-dot.active { background:var(--gold-light); }
-
-        .detail-gallery { position:relative; width:100%; height:min(55vh,430px); background:#111; border-radius:12px; overflow:hidden; }
-        .detail-gallery img { width:100%; height:100%; object-fit:contain; }
-        .detail-layout { display:grid; grid-template-columns:1.1fr .9fr; gap:24px; }
-        .detail-info { text-align:right; }
-        .detail-info h2 { color:var(--gold-light); margin-bottom:10px; }
-        @media (max-width:700px) { .detail-layout { grid-template-columns:1fr; } .detail-gallery { height:360px; } }
-
         @media (max-width: 900px) {
             .hero-grid { grid-template-columns: 1fr; text-align: center; }
             .hero-text-content { text-align: center; }
@@ -739,15 +713,10 @@
     </section>
 
     <div class="categories-bar" id="categories-bar"></div>
-    <div class="categories-bar" id="gender-filter-bar">
-        <button class="cat-btn active" onclick="filterGender('all')">الكل</button>
-        <button class="cat-btn" onclick="filterGender('men')">رجالي</button>
-        <button class="cat-btn" onclick="filterGender('women')">حريمي</button>
-    </div>
 
-    <div class="container" id="products-section">
+    <main class="container" id="products-section">
         <div class="products-grid" id="products-grid"></div>
-    </div>
+    </main>
 
     <footer>
         <div class="footer-brand">TRENDIX</div>
@@ -763,13 +732,17 @@
         </div>
 
         <div class="phones-box">
-            <a class="phone-chip" href="tel:+201050708955"><i class="fa-solid fa-phone"></i> 01050708955</a>
+           
         </div>
 
         <div class="copyright">
-            تم التصميم والتطوير بواسطة <strong>Eng. Mina Talaat</strong>
+            جميع الحقوق محفوظة &copy; 2026 متجر <strong>TRENDIX</strong>
         </div>
     </footer>
+
+    <a href="https://wa.me/01050708955" target="_blank" rel="noopener" class="floating-wa" title="تواصل معنا عبر واتساب">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 
     <div class="modal" id="cart-modal">
         <div class="modal-content">
@@ -795,13 +768,13 @@
                     </div>
                     <div class="form-group">
                         <label>رقم الهاتف (يفضل عليه واتساب) *</label>
-                        <input type="tel" id="cust-phone" class="form-control" required placeholder="01050708955">
+                        <input type="tel" id="cust-phone" class="form-control" required placeholder="01xxxxxxxxx">
                     </div>
                     <div class="form-group">
                         <label>العنوان بالتفصيل (المنطقة / الشارع / علامة مميزة) *</label>
                         <textarea id="cust-address" class="form-control" rows="3" required placeholder="اكتب عنوانك بالتفصيل..."></textarea>
                     </div>
-                    <button type="submit" id="confirm-order-btn" class="btn btn-gold" style="width: 100%; justify-content: center; font-size: 1.1rem; border-radius: 30px;">
+                    <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; font-size: 1.1rem; border-radius: 30px;">
                         <i class="fa-solid fa-check-circle"></i> تأكيد الطلب الآن
                     </button>
                 </form>
@@ -875,14 +848,6 @@
                         <label>التصنيف / الصنف *</label>
                         <select id="prod-category" class="form-control" required></select>
                     </div>
-                    <div class="form-group">
-                        <label>الجنس *</label>
-                        <select id="prod-gender" class="form-control" required>
-                            <option value="رجالي">رجالي</option>
-                            <option value="حريمي">حريمي</option>
-                            <option value="مشترك">مشترك</option>
-                        </select>
-                    </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="form-group">
                             <label>السعر الحالي (بعد الخصم) *</label>
@@ -894,11 +859,9 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>صور المنتج (الصورة الأساسية ثم صور إضافية، رابط واحد في كل سطر) *</label>
-                        <textarea id="prod-img-url" class="form-control" rows="4" placeholder="ضع رابط الصورة الأساسية في السطر الأول&#10;ضع روابط الصور الإضافية في أسطر أخرى"></textarea>
-                        <input type="file" id="prod-img-file" accept="image/*" multiple class="form-control" style="margin-top: 8px;" onchange="handleMultipleImageUpload(event)">
-                        <div id="prod-images-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"></div>
-                        <small style="color:var(--text-muted);">اختر عدة صور للجوال دفعة واحدة، أو ضع روابط الصور أسطرًا منفصلة.</small>
+                        <label>رابط الصورة (URL) أو ارفع صورة من جهازك *</label>
+                        <input type="text" id="prod-img-url" class="form-control" placeholder="ضع رابط الصورة هنا أو اختر ملفاً بالأسفل">
+                        <input type="file" id="prod-img-file" accept="image/*" class="form-control" style="margin-top: 8px;" onchange="handleImageUpload(event)">
                     </div>
                     <div class="form-group">
                         <label>وصف مختصر للمنتج</label>
@@ -911,30 +874,10 @@
                 </form>
 
                 <h3 style="color: var(--gold-light); margin-bottom: 10px;">3. المنتجات الحالية</h3>
-                <div class="form-group">
-                    <label>فلتر حسب التصنيف:</label>
-                    <select id="admin-category-filter" class="form-control" onchange="setAdminProductFilter(this.value)">
-                        <option value="الكل">الكل</option>
-                    </select>
-                </div>
                 <div id="admin-products-list"></div>
             </div>
         </div>
     </div>
-
-    <div class="modal" id="product-detail-modal">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h2><i class="fa-solid fa-images"></i> تفاصيل المنتج</h2>
-                <button class="close-btn" onclick="closeModal('product-detail-modal')">&times;</button>
-            </div>
-            <div id="product-detail-content"></div>
-        </div>
-    </div>
-
-    <a href="https://wa.me/201050708955" target="_blank" rel="noopener" class="floating-wa" title="تواصل معنا عبر واتساب">
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -943,97 +886,68 @@
 
         const SUPABASE_URL = "https://wusiwphxjqwnmwkxcqac.supabase.co";
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_tCPv7dfMWzFZQYxTMRv2Bg_9HlyCtgt";
-        const trendixDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
         const defaultCategories = ["ساعات", "أساور", "سلاسل", "نظارات"];
         const defaultProducts = [
             {
-                id: 1794986850144,
-                name: "ساعة Patek رجالي",
+                id: 1,
+                name: "ساعة TRENDIX Royal Gold",
                 category: "ساعات",
-                price: 420,
-                oldPrice: "",
+                price: 650,
+                oldPrice: 850,
                 image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80"],
-                gender: "رجالي",
-                desc: "ساعة رجالي أنيقة بتصميم فاخر وجودة عالية."
+                desc: "تصميم ملكي فاخر مقاوم للماء مع سوار ستانلس ستيل."
             },
             {
-                id: 1794987500165,
-                name: "ساعة أوديمار Piguet رجالي",
+                id: 2,
+                name: "ساعة Classic Black Edition",
                 category: "ساعات",
-                price: 400,
+                price: 580,
                 oldPrice: "",
                 image: "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80"],
-                gender: "رجالي",
-                desc: "ساعة رجالي عصرية بتصميم مميز يناسب الإطلالات المختلفة."
+                desc: "أناقة اللون الأسود المطفي لإطلالة رسمية وكاجوال."
             },
             {
-                id: 1794987798802,
-                name: "ساعة معدن حريمي ماركات مع إنسيال",
-                category: "ساعات",
-                price: 380,
-                oldPrice: "",
-                image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80"],
-                gender: "حريمي",
-                desc: "ساعة معدن حريمي مميزة مع إنسيال أنيق."
+                id: 3,
+                name: "نظارة شمسية Aviator Gold",
+                category: "نظارات",
+                price: 350,
+                oldPrice: 450,
+                image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=600&q=80",
+                desc: "عدسات حماية UV400 مع إطار معدني خفيف الوزن."
             }
         ];
 
         let categories = defaultCategories;
-        let savedCache = [];
-        let products = defaultProducts.map(product => ({ ...product }));
-
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('trendix_cart')) || [];
         let orders = [];
-        let cart = JSON.parse(localStorage.getItem('trendix_cart') || '[]');
         let currentFilter = 'الكل';
         let currentOrderFilter = 'all';
-        let currentGenderFilter = 'all';
-        let adminProductFilter = 'الكل';
-        let productsLoaded = false;
-        let visibleProductCount = 3;
-
-        function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
-            const withTimeout = promise => Promise.race([
-                promise,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('انتهت مهلة الاتصال بقاعدة البيانات')), 4000))
-            ]);
-
-            const [categoriesResult, productsResult, ordersResult] = await Promise.allSettled([
-                withTimeout(trendixDb.from('trendix_categories').select('*').order('id')),
-                withTimeout(trendixDb.from('trendix_products').select('*').order('id')),
-                withTimeout(trendixDb.from('trendix_orders').select('*'))
-            ]);
-
-            if (categoriesResult.status === 'fulfilled' && !categoriesResult.value.error && categoriesResult.value.data?.length) {
-                categories = categoriesResult.value.data.map(row => row.name);
+            const categoriesResult = await supabase.from('trendix_categories').select('*').order('id');
+            if (!categoriesResult.error && categoriesResult.data?.length) {
+                categories = categoriesResult.data.map(row => row.name);
             }
 
-            if (productsResult.status === 'fulfilled' && !productsResult.value.error && productsResult.value.data) {
-                if (productsResult.value.data.length) {
-                    products = productsResult.value.data.map(row => ({
-                        id: row.id,
-                        name: row.name,
-                        category: row.category,
-                        price: Number(row.price),
-                        oldPrice: row.old_price ?? "",
-                        image: row.image || FALLBACK_LOGO,
-                        images: splitProductImages(row.image),
-                        desc: row.description || '',
-                        gender: row.gender || 'مشترك',
-                    }));
-                }
-            } else {
-                console.warn('تعذر تحميل المنتجات من Supabase، يتم إبقاء المنتجات الأولى ظاهرة.',
-                    productsResult.reason || productsResult.value?.error);
+            const productsResult = await supabase.from('trendix_products').select('*').order('id');
+            if (!productsResult.error && productsResult.data) {
+                products = productsResult.data.map(row => ({
+                    id: row.id,
+                    name: row.name,
+                    category: row.category,
+                    price: Number(row.price),
+                    oldPrice: row.old_price ?? "",
+                    image: row.image || FALLBACK_LOGO,
+                    desc: row.description || ''
+                }));
             }
 
-            if (ordersResult.status === 'fulfilled' && !ordersResult.value.error && ordersResult.value.data) {
-                orders = ordersResult.value.data.map(row => ({
+            const ordersResult = await supabase.from('trendix_orders').select('*');
+            if (!ordersResult.error && ordersResult.data) {
+                orders = ordersResult.data.map(row => ({
                     id: row.id,
                     date: row.date,
                     customer: row.customer,
@@ -1043,46 +957,50 @@
                 }));
             }
 
-            productsLoaded = true;
             renderCategories();
             renderProducts();
+            updateCartBadge();
         }
 
         async function saveData() {
             localStorage.setItem('trendix_cart', JSON.stringify(cart));
 
+            const categoryDelete = await supabase.from('trendix_categories').delete().neq('id', 0);
+            if (categoryDelete.error) console.error(categoryDelete.error);
             if (categories.length) {
-                await trendixDb.from('trendix_categories').upsert(
-                    categories.map(name => ({ name })),
-                    { onConflict: 'name' }
+                const categoryInsert = await supabase.from('trendix_categories').insert(
+                    categories.map(name => ({ name }))
                 );
+                if (categoryInsert.error) console.error(categoryInsert.error);
             }
 
+            const productDelete = await supabase.from('trendix_products').delete().neq('id', 0);
+            if (productDelete.error) console.error(productDelete.error);
             if (products.length) {
-                await trendixDb.from('trendix_products').upsert(
-                    products.map(product => ({
-                        id: product.id,
-                        name: product.name,
-                        category: product.category,
-                        price: product.price,
-                        old_price: product.oldPrice || null,
-                        image: product.image,
-                        description: product.desc || ''
-                    }))
-                );
+                const productInsert = await supabase.from('trendix_products').insert(products.map(product => ({
+                    id: product.id,
+                    name: product.name,
+                    category: product.category,
+                    price: product.price,
+                    old_price: product.oldPrice || null,
+                    image: product.image,
+                    description: product.desc || ''
+                })));
+                if (productInsert.error) console.error(productInsert.error);
             }
 
+            const orderDelete = await supabase.from('trendix_orders').delete().neq('id', '');
+            if (orderDelete.error) console.error(orderDelete.error);
             if (orders.length) {
-                await trendixDb.from('trendix_orders').upsert(
-                    orders.map(order => ({
-                        id: order.id,
-                        date: order.date,
-                        customer: order.customer,
-                        items: order.items,
-                        total: order.total,
-                        status: order.status
-                    }))
-                );
+                const orderInsert = await supabase.from('trendix_orders').insert(orders.map(order => ({
+                    id: order.id,
+                    date: order.date,
+                    customer: order.customer,
+                    items: order.items,
+                    total: order.total,
+                    status: order.status
+                })));
+                if (orderInsert.error) console.error(orderInsert.error);
             }
 
             await loadSharedData();
@@ -1098,9 +1016,7 @@
 
             const select = document.getElementById('prod-category');
             if (select) {
-                const selectedCategory = select.value;
                 select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-                if (selectedCategory && categories.includes(selectedCategory)) select.value = selectedCategory;
             }
 
             const adminList = document.getElementById('admin-categories-list');
@@ -1116,53 +1032,29 @@
 
         function filterProducts(cat) {
             currentFilter = cat;
-            visibleProductCount = 3;
             renderCategories();
-            renderProducts();
-        }
-
-        function filterGender(gender) {
-            currentGenderFilter = gender;
-            visibleProductCount = 3;
-            document.querySelectorAll('#gender-filter-bar .cat-btn').forEach(button => button.classList.remove('active'));
-            if (typeof event !== 'undefined' && event?.target) event.target.classList.add('active');
-            renderProducts();
-        }
-
-        function showMoreProducts() {
-            visibleProductCount += 3;
             renderProducts();
         }
 
         function renderProducts() {
             const grid = document.getElementById('products-grid');
-            const filtered = products.filter(p => {
-                const categoryMatch = currentFilter === 'الكل' || p.category === currentFilter;
-                const genderMatch = currentGenderFilter === 'all' || p.gender === 'مشترك' ||
-                    (currentGenderFilter === 'men' && p.gender === 'رجالي') ||
-                    (currentGenderFilter === 'women' && p.gender === 'حريمي');
-                return categoryMatch && genderMatch;
-            });
+            const filtered = currentFilter === 'الكل' ? products : products.filter(p => p.category === currentFilter);
 
             if (filtered.length === 0) {
                 grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد منتجات في هذا القسم حالياً.</p>`;
                 return;
             }
 
-            visibleProductCount = Math.max(3, Math.min(visibleProductCount, filtered.length));
-            const visibleProducts = filtered.slice(0, visibleProductCount);
-
-            grid.innerHTML = visibleProducts.map(p => {
+            grid.innerHTML = filtered.map(p => {
                 let hasDiscount = p.oldPrice && Number(p.oldPrice) > Number(p.price);
                 let discountPercent = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
 
                 return `
                     <div class="product-card">
-                        <div class="product-img-wrap" onclick="openProductDetail(${p.id})" style="cursor:pointer;">
+                        <div class="product-img-wrap">
                             <span class="product-tag">${p.category}</span>
                             ${hasDiscount ? `<span class="discount-badge">خصم ${discountPercent}%</span>` : ''}
-                            <img src="${p.images?.[0] || p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80'">
-                            ${p.images?.length > 1 ? `<span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);color:#fff;border-radius:12px;padding:3px 8px;font-size:.75rem;">${p.images.length} صور</span>` : ''}
+                            <img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80'">
                         </div>
                         <div class="product-info">
                             <div>
@@ -1186,13 +1078,7 @@
                         </div>
                     </div>
                 `;
-            }).join('') + (visibleProductCount < filtered.length ? `
-                <div style="grid-column:1/-1;text-align:center;padding:20px 0 5px;">
-                    <button class="btn btn-gold" type="button" onclick="showMoreProducts()" style="border-radius:25px;padding:10px 28px;">
-                        عرض المزيد <i class="fa-solid fa-chevron-down"></i>
-                    </button>
-                </div>
-            ` : '');
+            }).join('');
         }
 
         function shareProductWhatsApp(name, price) {
@@ -1278,71 +1164,30 @@
             renderCartItems();
         }
 
-        async function submitOrder(e) {
+        function submitOrder(e) {
             e.preventDefault();
-            const confirmBtn = document.getElementById('confirm-order-btn');
-            if (confirmBtn?.disabled) return;
-
             const name = document.getElementById('cust-name').value.trim();
-            const phone = normalizeEgyptPhone(document.getElementById('cust-phone').value);
-            if (!/^20(?:10|11|12|15)\d{8}$/.test(phone)) {
-                alert('برجاء إدخال رقم موبايل مصر صحيح، مثال: 01012345678');
-                return;
-            }
-
+            const phone = document.getElementById('cust-phone').value.trim();
             const address = document.getElementById('cust-address').value.trim();
-            if (!address) {
-                alert('برجاء كتابة عنوان التسليم بالتفصيل');
-                return;
-            }
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
-            if (!cart.length) {
-                alert('السلة فارغة');
-                return;
-            }
-
-            if (confirmBtn) {
-                confirmBtn.disabled = true;
-                confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأكيد الطلب...';
-            }
-
-            const total = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty)), 0);
             const newOrder = {
                 id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
                 date: new Date().toLocaleString('ar-EG'),
                 customer: { name, phone, address },
                 items: [...cart],
-                total,
+                total: total,
                 status: 'pending'
             };
 
-            try {
-                const { error } = await trendixDb.from('trendix_orders').insert({
-                    id: newOrder.id,
-                    date: newOrder.date,
-                    customer: newOrder.customer,
-                    items: newOrder.items,
-                    total: newOrder.total,
-                    status: newOrder.status
-                });
+            orders.unshift(newOrder);
+            cart = [];
+            saveData();
+            updateCartBadge();
+            document.getElementById('order-form').reset();
+            closeModal('cart-modal');
 
-                if (error) throw new Error(error.message);
-
-                orders.unshift(newOrder);
-                cart = [];
-                localStorage.setItem('trendix_cart', JSON.stringify(cart));
-                updateCartBadge();
-                document.getElementById('order-form').reset();
-                closeModal('cart-modal');
-                alert(`شكراً لك يا ${name}! تم استلام طلبك بنجاح برقم (${newOrder.id}).`);
-            } catch (error) {
-                alert('تعذر تأكيد الطلب: ' + (error?.message || 'تحقق من الاتصال بالإنترنت وحاول مرة أخرى'));
-            } finally {
-                if (confirmBtn) {
-                    confirmBtn.disabled = false;
-                    confirmBtn.innerHTML = '<i class="fa-solid fa-check-circle"></i> تأكيد الطلب الآن';
-                }
-            }
+            alert(`شكراً لك يا ${name}!\nتم استلام طلبك بنجاح برقم (${newOrder.id}).\nسنتواصل معك عبر الواتساب قريباً لتأكيد الطلب ومصاريف الشحن.`);
         }
 
         function openAdminAuth() {
@@ -1383,60 +1228,130 @@
             if (activeBtn) activeBtn.className = 'btn btn-gold';
         }
 
-        async function addCategory() {
+        function addCategory() {
             const input = document.getElementById('new-category-input');
             const val = input.value.trim();
             if (!val) return;
             if (!categories.includes(val)) {
                 categories.push(val);
-                const { error } = await trendixDb.from('trendix_categories').insert({ name: val });
-                if (error) { alert('تعذر حفظ الصنف: ' + error.message); return; }
-                await loadSharedData();
+                saveData();
+                renderCategories();
                 input.value = '';
             } else {
                 alert('هذا الصنف موجود بالفعل!');
             }
         }
 
-        async function deleteCategory(index) {
+        function deleteCategory(index) {
             if (categories.length <= 1) {
                 alert('يجب أن يظل هناك صنف واحد على الأقل في المتجر.');
                 return;
             }
-            const name = categories[index];
-            if (confirm(`هل أنت متأكد من حذف صنف "${name}"؟`)) {
-                const { error } = await trendixDb.from('trendix_categories').delete().eq('name', name);
-                if (error) { alert('تعذر حذف الصنف: ' + error.message); return; }
+            if (confirm(`هل أنت متأكد من حذف صنف "${categories[index]}"؟`)) {
                 categories.splice(index, 1);
-                if (currentFilter !== 'الكل' && !categories.includes(currentFilter)) currentFilter = 'الكل';
-                await loadSharedData();
+                if (currentFilter !== 'الكل' && !categories.includes(currentFilter)) {
+                    currentFilter = 'الكل';
+                }
+                saveData();
+                renderCategories();
+                renderProducts();
             }
         }
 
-        async function setAdminProductFilter(category) {
-            adminProductFilter = category;
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('prod-img-url').value = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-prod-id').value;
+            const name = document.getElementById('prod-name').value.trim();
+            const category = document.getElementById('prod-category').value;
+            const price = Number(document.getElementById('prod-price').value);
+            const oldPrice = document.getElementById('prod-old-price').value ? Number(document.getElementById('prod-old-price').value) : "";
+            const image = document.getElementById('prod-img-url').value.trim() || FALLBACK_LOGO;
+            const desc = document.getElementById('prod-desc').value.trim();
+
+            if (editId) {
+                const prod = products.find(p => p.id == editId);
+                if (prod) {
+                    prod.name = name;
+                    prod.category = category;
+                    prod.price = price;
+                    prod.oldPrice = oldPrice;
+                    prod.image = image;
+                    prod.desc = desc;
+                }
+                alert('تم تحديث المنتج بنجاح!');
+            } else {
+                const newProd = {
+                    id: Date.now(),
+                    name,
+                    category,
+                    price,
+                    oldPrice,
+                    image,
+                    desc
+                };
+                products.unshift(newProd);
+                alert('تم إضافة المنتج بنجاح!');
+            }
+
+            saveData();
+            renderProducts();
             renderProductsAdmin();
+            resetProductForm();
+        }
+
+        function editProduct(id) {
+            const prod = products.find(p => p.id == id);
+            if (!prod) return;
+
+            document.getElementById('edit-prod-id').value = prod.id;
+            document.getElementById('prod-name').value = prod.name;
+            document.getElementById('prod-category').value = prod.category;
+            document.getElementById('prod-price').value = prod.price;
+            document.getElementById('prod-old-price').value = prod.oldPrice || '';
+            document.getElementById('prod-img-url').value = prod.image;
+            document.getElementById('prod-desc').value = prod.desc || '';
+
+            document.getElementById('form-title').innerText = '2. تعديل المنتج المحدد';
+            document.getElementById('save-prod-btn').innerHTML = '<i class="fa-solid fa-save"></i> حفظ التعديلات';
+            document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
+
+            document.getElementById('form-title').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetProductForm() {
+            document.getElementById('product-form').reset();
+            document.getElementById('edit-prod-id').value = '';
+            document.getElementById('form-title').innerText = '2. إضافة منتج جديد';
+            document.getElementById('save-prod-btn').innerHTML = '<i class="fa-solid fa-save"></i> حفظ ونشر المنتج';
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+        }
+
+        function deleteProduct(id) {
+            if (confirm('هل تريد حذف هذا المنتج نهائياً؟')) {
+                products = products.filter(p => p.id !== id);
+                saveData();
+                renderProducts();
+                renderProductsAdmin();
+            }
         }
 
         function renderProductsAdmin() {
             const list = document.getElementById('admin-products-list');
-            const filter = document.getElementById('admin-category-filter');
-            if (filter) {
-                filter.innerHTML = '<option value="الكل">الكل</option>' + categories.map(category => `<option value="${category}">${category}</option>`).join('');
-                if (!["الكل", ...categories].includes(adminProductFilter)) adminProductFilter = 'الكل';
-                filter.value = adminProductFilter;
-            }
-
-            const visibleProducts = adminProductFilter === 'الكل'
-                ? products
-                : products.filter(product => product.category === adminProductFilter);
-
-            if (visibleProducts.length === 0) {
-                list.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 15px;">لا توجد منتجات مسجلة في هذا التصنيف.</p>`;
+            if (products.length === 0) {
+                list.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 15px;">لا توجد منتجات مسجلة.</p>`;
                 return;
             }
-
-            list.innerHTML = visibleProducts.map(p => `
+            list.innerHTML = products.map(p => `
                 <div class="admin-product-row">
                     <div>
                         <strong>${p.name}</strong> <span style="color: var(--gold-light);">(${p.category})</span> - ${p.price} ج.م ${p.oldPrice ? `<span style="color:var(--text-muted); text-decoration:line-through; font-size:0.85rem;">(${p.oldPrice} ج.م)</span>` : ''}
@@ -1453,51 +1368,8 @@
             `).join('');
         }
 
-        async function saveProduct(e) {
-            e.preventDefault();
-            const editId = document.getElementById('edit-prod-id').value;
-            const name = document.getElementById('prod-name').value.trim();
-            const categorySelect = document.getElementById('prod-category');
-            const category = categorySelect.value;
-            const gender = document.getElementById('prod-gender').value;
-            const price = Number(document.getElementById('prod-price').value);
-            const oldPrice = document.getElementById('prod-old-price').value ? Number(document.getElementById('prod-old-price').value) : null;
-            const image = document.getElementById('prod-img-url').value.trim() || FALLBACK_LOGO;
-            const desc = document.getElementById('prod-desc').value.trim();
-            const row = { id: editId ? Number(editId) : Date.now(), name, category, gender, price, old_price: oldPrice, image, description: desc };
-
-            const { error } = await trendixDb.from('trendix_products').upsert(row);
-            if (error) { alert('تعذر حفظ المنتج: ' + error.message); return; }
-
-            const savedCategory = category;
-            await loadSharedData();
-            const savedProduct = products.find(item => String(item.id) === String(row.id));
-            if (savedProduct && savedProduct.category !== savedCategory) {
-                await trendixDb.from('trendix_products').update({ category: savedCategory }).eq('id', row.id);
-                await loadSharedData();
-            }
-
-            await loadSharedData();
-            renderProductsAdmin();
-            resetProductForm();
-            alert(editId ? 'تم تحديث المنتج بنجاح!' : 'تم إضافة المنتج بنجاح!');
-        }
-
-        async function deleteProduct(id) {
-            if (!confirm('هل تريد حذف هذا المنتج نهائياً؟')) return;
-            const { error } = await trendixDb.from('trendix_products').delete().eq('id', id);
-            if (error) { alert('تعذر حذف المنتج: ' + error.message); return; }
-            await loadSharedData();
-            renderProductsAdmin();
-        }
-
         function openWhatsApp(waPhone, msgText) {
-            const phone = normalizeEgyptPhone(waPhone);
-            if (!/^20(?:10|11|12|15)\d{8}$/.test(phone)) {
-                alert('رقم الهاتف غير صحيح. يجب إدخال رقم موبايل مصر بصيغة 01012345678 أو 201012345678');
-                return;
-            }
-            window.open(`https://wa.me/${phone}?text=${msgText}`, '_blank');
+            window.open(`https://wa.me/${waPhone}?text=${msgText}`, '_blank');
         }
 
         function setOrderFilter(status) {
@@ -1508,260 +1380,105 @@
             renderOrdersAdmin();
         }
 
-        async function changeOrderStatus(index, newStatus) {
-            const order = orders[index];
-            if (!order) return;
-            const { error } = await trendixDb.from('trendix_orders').update({ status: newStatus }).eq('id', order.id);
-            if (error) { alert('تعذر تحديث حالة الطلب: ' + error.message); return; }
-            order.status = newStatus;
+        function changeOrderStatus(index, newStatus) {
+            orders[index].status = newStatus;
+            saveData();
             renderOrdersAdmin();
         }
 
-        async function deleteOrder(index) {
-            if (!confirm('هل تريد حذف هذا الطلب نهائياً؟')) return;
-            const order = orders[index];
-            if (!order) return;
-            const { error } = await trendixDb.from('trendix_orders').delete().eq('id', order.id);
-            if (error) { alert('تعذر حذف الطلب: ' + error.message); return; }
-            orders.splice(index, 1);
-            renderOrdersAdmin();
+        function renderOrdersAdmin() {
+            document.getElementById('orders-count').innerText = orders.length;
+            const list = document.getElementById('orders-list');
+
+            let filteredOrders = orders;
+            if (currentOrderFilter !== 'all') {
+                filteredOrders = orders.filter(ord => ord.status === currentOrderFilter);
+            }
+
+            if (filteredOrders.length === 0) {
+                list.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 25px;">لا توجد طلبات في هذا القسم حالياً.</p>`;
+                return;
+            }
+
+            list.innerHTML = filteredOrders.map((ord) => {
+                const realIdx = orders.findIndex(o => o.id === ord.id);
+                const itemsText = ord.items.map(i => `${i.name} (×${i.qty})`).join(' + ');
+                let waPhone = ord.customer.phone.replace(/\D/g, '');
+                if (waPhone.startsWith('01')) waPhone = '2' + waPhone;
+
+                const confirmMsg = encodeURIComponent(
+                    `أهلاً بك يا ${ord.customer.name}، تم استلام طلبك من *TRENDIX* بنجاح!\n` +
+                    `تفاصيل الطلب: ${itemsText}\n` +
+                    `إجمالي المنتجات: ${ord.total} ج.م + مصاريف الشحن حسب عنوانك (${ord.customer.address}).\n` +
+                    `برجاء التأكيد لإرسال الأوردر فوراً.`
+                );
+
+                let statusClass = '';
+                let badgeText = '';
+                if (ord.status === 'confirmed') {
+                    statusClass = 'status-confirmed';
+                    badgeText = '✅ تم التأكيد';
+                } else if (ord.status === 'delivered') {
+                    statusClass = 'status-delivered';
+                    badgeText = '📦 تم الاستلام';
+                } else {
+                    statusClass = '';
+                    badgeText = '⏳ قيد الانتظار';
+                }
+
+                return `
+                    <div class="order-card ${statusClass}">
+                        <div class="order-status-badge ${ord.status === 'confirmed' ? 'badge-confirmed' : ord.status === 'delivered' ? 'badge-delivered' : 'badge-pending'}">
+                            ${badgeText}
+                        </div>
+                        <div class="order-header">
+                            <span>رقم الطلب: ${ord.id}</span>
+                            <span>${ord.date}</span>
+                        </div>
+                        <p><strong>العميل:</strong> ${ord.customer.name}</p>
+                        <p><strong>الهاتف:</strong> ${ord.customer.phone}</p>
+                        <p><strong>العنوان:</strong> ${ord.customer.address}</p>
+                        <p style="margin-top: 8px; color: #ddd;"><strong>المنتجات:</strong> ${itemsText}</p>
+                        <p style="color: var(--gold-light); font-weight: 800; font-size: 1.1rem; margin: 8px 0;">إجمالي المنتجات: ${ord.total} ج.م</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center;">
+                            <button class="btn btn-whatsapp" onclick="openWhatsApp('${waPhone}', '${confirmMsg}')">
+                                <i class="fa-brands fa-whatsapp"></i> تواصل واتساب
+                            </button>
+
+                            ${ord.status === 'pending' ? `
+                                <button class="btn btn-confirm" style="padding: 6px 12px; font-size: 0.85rem;" onclick="changeOrderStatus(${realIdx}, 'confirmed')">
+                                    <i class="fa-solid fa-check"></i> تم تأكيد الطلب
+                                </button>
+                            ` : ''}
+
+                            ${ord.status !== 'delivered' ? `
+                                <button class="btn btn-matched" style="padding: 6px 12px; font-size: 0.85rem;" onclick="changeOrderStatus(${realIdx}, 'delivered')">
+                                    <i class="fa-solid fa-box-open"></i> تم الاستلام
+                                </button>
+                            ` : ''}
+
+                            <button class="btn btn-danger" onclick="deleteOrder(${realIdx})">
+                                <i class="fa-solid fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteOrder(index) {
+            if (confirm('هل تريد حذف هذا الطلب نهائياً؟')) {
+                orders.splice(index, 1);
+                saveData();
+                renderOrdersAdmin();
+            }
         }
 
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
         }
 
-        function renderOrdersAdmin() {
-            const countEl = document.getElementById('orders-count');
-            const list = document.getElementById('orders-list');
-            if (countEl) countEl.textContent = orders.length;
-            if (!list) return;
-
-            let filteredOrders = orders;
-            if (currentOrderFilter !== 'all') {
-                filteredOrders = orders.filter(order => order.status === currentOrderFilter);
-            }
-
-            if (filteredOrders.length === 0) {
-                list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:25px;">لا توجد طلبات في هذا القسم حالياً.</p>';
-                return;
-            }
-
-            list.innerHTML = filteredOrders.map(order => {
-                const realIndex = orders.findIndex(item => item.id === order.id);
-                const itemsText = order.items.map(item => `${item.name} (×${item.qty})`).join(' + ');
-                let phone = normalizeEgyptPhone(order.customer.phone);
-
-                const confirmMessage = encodeURIComponent(
-                    `أهلاً بك يا ${order.customer.name}، تم استلام طلبك من TRENDIX بنجاح!\n` +
-                    `تفاصيل الطلب: ${itemsText}\nإجمالي المنتجات: ${order.total} ج.م + مصاريف الشحن.`
-                );
-
-                const statusText = order.status === 'confirmed' ? '✅ تم التأكيد' : order.status === 'delivered' ? '📦 تم الاستلام' : '⏳ قيد الانتظار';
-                const statusClass = order.status === 'confirmed' ? 'badge-confirmed' : order.status === 'delivered' ? 'badge-delivered' : 'badge-pending';
-
-                return `
-                    <div class="order-card ${order.status === 'confirmed' ? 'status-confirmed' : order.status === 'delivered' ? 'status-delivered' : ''}">
-                        <div class="order-status-badge ${statusClass}">${statusText}</div>
-                        <div class="order-header"><span>رقم الطلب: ${order.id}</span><span>${order.date}</span></div>
-                        <p><strong>العميل:</strong> ${order.customer.name}</p>
-                        <p><strong>الهاتف:</strong> ${order.customer.phone}</p>
-                        <p><strong>العنوان:</strong> ${order.customer.address}</p>
-                        <p style="margin-top:8px;color:#ddd;"><strong>المنتجات:</strong> ${itemsText}</p>
-                        <p style="color:var(--gold-light);font-weight:800;font-size:1.1rem;margin:8px 0;">إجمالي المنتجات: ${order.total} ج.م</p>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-                            <button class="btn btn-whatsapp" onclick="openWhatsApp('${phone}','${confirmMessage}')"><i class="fa-brands fa-whatsapp"></i> تواصل واتساب</button>
-                            ${order.status === 'pending' ? `<button class="btn btn-confirm" onclick="changeOrderStatus(${realIndex},'confirmed')">تم تأكيد الطلب</button>` : ''}
-                            ${order.status !== 'delivered' ? `<button class="btn btn-matched" onclick="changeOrderStatus(${realIndex},'delivered')">تم الاستلام</button>` : ''}
-                            <button class="btn btn-danger" onclick="deleteOrder(${realIndex})"><i class="fa-solid fa-trash"></i> حذف</button>
-                        </div>
-                    </div>`;
-            }).join('');
-        }
-
-        renderCategories();
-        renderProducts();
-        updateCartBadge();
-        loadSharedData().catch(error => console.error('Supabase load error:', error));
-
-        function editProduct(id) {
-            const product = products.find(item => String(item.id) === String(id));
-            if (!product) {
-                alert('تعذر العثور على المنتج المحدد');
-                return;
-            }
-
-            document.getElementById('edit-prod-id').value = product.id;
-            document.getElementById('prod-name').value = product.name;
-            document.getElementById('prod-category').value = product.category;
-            document.getElementById('prod-price').value = product.price;
-            document.getElementById('prod-old-price').value = product.oldPrice || '';
-            document.getElementById('prod-img-url').value = (product.images?.length ? product.images : splitProductImages(product.image)).join('\n');
-            renderProductImagesPreview(splitProductImages(document.getElementById('prod-img-url').value).filter(url => url !== FALLBACK_LOGO));
-            document.getElementById('prod-desc').value = product.desc || '';
-
-            document.getElementById('form-title').textContent = '2. تعديل المنتج المحدد';
-            document.getElementById('save-prod-btn').innerHTML = '<i class="fa-solid fa-save"></i> حفظ التعديلات';
-            document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
-            document.getElementById('form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function resetProductForm() {
-            document.getElementById('product-form').reset();
-            document.getElementById('edit-prod-id').value = '';
-            document.getElementById('form-title').textContent = '2. إضافة منتج جديد';
-            document.getElementById('save-prod-btn').innerHTML = '<i class="fa-solid fa-save"></i> حفظ ونشر المنتج';
-            document.getElementById('cancel-edit-btn').style.display = 'none';
-            document.getElementById('prod-images-preview').innerHTML = '';
-        }
-
-        let activeDetailProductId = null;
-        let activeGalleryIndex = 0;
-
-        async function handleMultipleImageUpload(event) {
-            const files = Array.from(event.target.files || []);
-            if (!files.length) return;
-
-            try {
-                const dataUrls = await Promise.all(files.map(file => compressPhoneImage(file)));
-                const uniqueDataUrls = [...new Set(dataUrls)];
-
-                if (!uniqueDataUrls.length) {
-                    throw new Error('لم يتم تجهيز أي صورة صالحة');
-                }
-
-                const urlField = document.getElementById('prod-img-url');
-                const existingUrls = urlField.value.split('\n').map(value => value.trim()).filter(Boolean);
-                const combinedUrls = [...new Set([...existingUrls, ...uniqueDataUrls])];
-
-                urlField.value = combinedUrls.join('\n');
-                urlField.dispatchEvent(new Event('input', { bubbles: true }));
-
-                renderProductImagesPreview(combinedUrls);
-            } catch (error) {
-                alert(error.message);
-            } finally {
-                event.target.value = '';
-            }
-        }
-
-        function renderProductImagesPreview(urls) {
-            const container = document.getElementById('prod-images-preview');
-            container.innerHTML = urls.map(url => `
-                <div class="image-preview" style="position:relative; width:calc(25% - 10px);">
-                    <img src="${url}" alt="معاينة الصورة" style="width:100%; border-radius:8px; object-fit:cover;">
-                    <button type="button" class="btn btn-danger" style="position:absolute; top:5px; right:5px; padding:4px 8px; border-radius:50%;" onclick="removeImagePreview(this)">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        function removeImagePreview(button) {
-            const previewContainer = document.getElementById('prod-images-preview');
-            const imagePreview = button.closest('.image-preview');
-            if (imagePreview) {
-                const imgSrc = imagePreview.querySelector('img').src;
-                const urlField = document.getElementById('prod-img-url');
-                const currentUrls = urlField.value.split('\n').filter(Boolean);
-                const newUrls = currentUrls.filter(url => url !== imgSrc);
-                urlField.value = newUrls.join('\n');
-                imagePreview.remove();
-            }
-        }
-
-        function normalizeEgyptPhone(value) {
-            const digits = String(value || '').replace(/\D/g, '');
-            if (!digits) return '';
-            if (digits.startsWith('20')) return digits;
-            if (digits.startsWith('0')) return '20' + digits.substring(1);
-            if (/^(10|11|12|15)/.test(digits)) return '20' + digits;
-            return digits;
-        }
-
-        function compressPhoneImage(file) {
-            return new Promise((resolve, reject) => {
-                if (!file.type.startsWith('image/')) {
-                    reject(new Error(`الملف "${file.name}" ليس صورة`));
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onerror = () => reject(new Error(`تعذر قراءة الصورة: ${file.name}`));
-                reader.onload = () => {
-                    const image = new Image();
-                    image.onerror = () => reject(new Error(`الصورة تالفة أو غير مدعومة: ${file.name}`));
-                    image.onload = () => {
-                        const maxSize = 900;
-                        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
-                        const canvas = document.createElement('canvas');
-                        canvas.width = Math.max(1, Math.round(image.width * scale));
-                        canvas.height = Math.max(1, Math.round(image.height * scale));
-                        const context = canvas.getContext('2d');
-                        context.fillStyle = '#ffffff';
-                        context.fillRect(0, 0, canvas.width, canvas.height);
-                        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-                        let quality = 0.72;
-                        let dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        while (dataUrl.length > 500000 && quality > 0.45) {
-                            quality -= 0.1;
-                            dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        }
-                        resolve(dataUrl);
-                    };
-                    image.src = reader.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function openProductDetail(id) {
-            const product = products.find(item => String(item.id) === String(id));
-            if (!product) return;
-           
-
-            activeDetailProductId = product.id;
-            activeGalleryIndex = 0;
-            renderProductDetail();
-            document.getElementById('product-detail-modal').classList.add('active');
-        }
-
-        function renderProductDetail() {
-            const product = products.find(item => String(item.id) === String(activeDetailProductId));
-            if (!product) return;
-            const images = product.images?.length ? [...new Set(product.images)] : splitProductImages(product.image);
-            activeGalleryIndex = Math.max(0, Math.min(activeGalleryIndex, images.length - 1));
-            const dots = images.map((_, index) => `<span class="gallery-dot ${index === activeGalleryIndex ? 'active' : ''}"></span>`).join('');
-            document.getElementById('product-detail-content').innerHTML = `
-                <div class="detail-layout">
-                    <div class="detail-gallery" ontouchstart="galleryTouchStart(event)" ontouchend="galleryTouchEnd(event)">
-                        <img src="${images[activeGalleryIndex]}" alt="${product.name}" onerror="this.src='${FALLBACK_LOGO}'">
-                        ${images.length > 1 ? `<button class="gallery-arrow prev" type="button" onclick="changeDetailImage(1)"><i class="fa-solid fa-chevron-right"></i></button><button class="gallery-arrow next" type="button" onclick="changeDetailImage(-1)"><i class="fa-solid fa-chevron-left"></i></button><div class="gallery-dots">${dots}</div>` : ''}
-                    </div>
-                    <div class="detail-info">
-                        <h2>${product.name}</h2>
-                        <p style="color:var(--text-muted);margin-bottom:14px;">${product.desc || ''}</p>
-                        <p style="color:var(--gold-light);font-size:1.35rem;font-weight:900;margin-bottom:16px;">${product.price} ج.م ${product.oldPrice ? `<span class="old-price">${product.oldPrice} ج.م</span>` : ''}</p>
-                        <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="addToCart(${product.id});closeModal('product-detail-modal')"><i class="fa-solid fa-cart-plus"></i> أضف للسلة</button>
-                    </div>
-                </div>`;
-        }
-
-        function changeDetailImage(direction) {
-            const product = products.find(item => String(item.id) === String(activeDetailProductId));
-            if (!product) return;
-            const images = product.images?.length ? [...new Set(product.images)] : splitProductImages(product.image);
-            activeGalleryIndex = (activeGalleryIndex + direction + images.length) % images.length;
-            renderProductDetail();
-        }
-
-        let galleryTouchX = 0;
-        function galleryTouchStart(event) { galleryTouchX = event.changedTouches[0].screenX; }
-        function galleryTouchEnd(event) {
-            const distance = event.changedTouches[0].screenX - galleryTouchX;
-            if (Math.abs(distance) > 45) changeDetailImage(distance < 0 ? -1 : 1);
-        }
+        loadSharedData();
     </script>
 </body>
 </html>
