@@ -747,6 +747,9 @@
 
     <div class="container" id="products-section">
         <div class="products-grid" id="products-grid"></div>
+        <button id="load-more-btn" class="btn btn-gold" onclick="loadMoreProducts()" style="display:none;margin:25px auto 0;border-radius:30px;justify-content:center;min-width:180px;">
+            <i class="fa-solid fa-chevron-down"></i> عرض المزيد
+        </button>
     </div>
 
     <footer>
@@ -987,6 +990,7 @@
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
         let productsLoaded = true;
+        let visibleProductsLimit = 3;
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
@@ -1095,12 +1099,14 @@
 
         function filterProducts(cat) {
             currentFilter = cat;
+            visibleProductsLimit = 3;
             renderCategories();
             renderProducts();
         }
 
         function filterGender(gender) {
             currentGenderFilter = gender;
+            visibleProductsLimit = 3;
             document.querySelectorAll('#gender-filter-bar .cat-btn').forEach(button => button.classList.remove('active'));
             event.target.classList.add('active');
             renderProducts();
@@ -1120,7 +1126,7 @@
                 return categoryMatch && genderMatch;
             });
 
-            const renderedProducts = productsLoaded ? filtered : filtered.slice(0, 6);
+            const renderedProducts = filtered.slice(0, visibleProductsLimit);
 
             if (filtered.length === 0) {
                 grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد منتجات في هذا القسم حالياً.</p>`;
@@ -1162,6 +1168,11 @@
                     </div>
                 `;
             }).join('');
+
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            if (loadMoreBtn) {
+                loadMoreBtn.style.display = filtered.length > visibleProductsLimit ? 'block' : 'none';
+            }
         }
 
         function shareProductWhatsApp(name, price) {
@@ -1671,13 +1682,15 @@
                         context.fillRect(0, 0, canvas.width, canvas.height);
                         context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
+
                         let quality = 0.72;
                         let dataUrl = canvas.toDataURL('image/jpeg', quality);
                         while (dataUrl.length > 500000 && quality > 0.45) {
+
                             quality -= 0.1;
                             dataUrl = canvas.toDataURL('image/jpeg', quality);
                         }
-                       
+                        resolve(dataUrl);
                     };
                     image.src = reader.result
                 };
@@ -1728,6 +1741,11 @@
         function galleryTouchEnd(event) {
             const distance = event.changedTouches[0].screenX - galleryTouchX;
             if (Math.abs(distance) > 45) changeDetailImage(distance < 0 ? -1 : 1);
+        }
+
+        function loadMoreProducts() {
+            visibleProductsLimit += 3;
+            renderProducts();
         }
     </script>
 </body>
