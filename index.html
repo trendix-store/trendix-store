@@ -978,7 +978,11 @@
 
         let categories = defaultCategories;
         let savedCache = [];
-        let products = [];
+        let products = defaultProducts.map(product => ({
+            ...product,
+            images: splitProductImages(product.image),
+            gender: 'مشترك'
+        }));
 
         let orders = [];
         let cart = JSON.parse(localStorage.getItem('trendix_cart') || '[]');
@@ -1008,6 +1012,8 @@
                     desc: row.description || '',
                     gender: row.gender || 'مشترك',
                 }));
+
+                localStorage.setItem('trendix_products_cache', JSON.stringify(products));
             }
 
             const ordersResult = await trendixDb.from('trendix_orders').select('*');
@@ -1673,6 +1679,7 @@
 
                         let quality = 0.72;
                         let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                       
                         while (dataUrl.length > 500000 && quality > 0.45) {
                             quality -= 0.1;
                             dataUrl = canvas.toDataURL('image/jpeg', quality);
