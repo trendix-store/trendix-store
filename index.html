@@ -954,6 +954,8 @@
                 price: 420,
                 oldPrice: "",
                 image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80",
+                images: ["https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80"],
+                gender: "رجالي",
                 desc: "ساعة رجالي أنيقة بتصميم فاخر وجودة عالية."
             },
             {
@@ -963,6 +965,8 @@
                 price: 400,
                 oldPrice: "",
                 image: "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80",
+                images: ["https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80"],
+                gender: "رجالي",
                 desc: "ساعة رجالي عصرية بتصميم مميز يناسب الإطلالات المختلفة."
             },
             {
@@ -972,13 +976,15 @@
                 price: 380,
                 oldPrice: "",
                 image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80",
+                images: ["https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80"],
+                gender: "حريمي",
                 desc: "ساعة معدن حريمي مميزة مع إنسيال أنيق."
             }
         ];
 
         let categories = defaultCategories;
         let savedCache = [];
-        let products = [];
+        let products = defaultProducts.map(product => ({ ...product }));
 
         let orders = [];
         let cart = JSON.parse(localStorage.getItem('trendix_cart') || '[]');
@@ -986,33 +992,48 @@
         let currentOrderFilter = 'all';
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
-        let productsLoaded = true;
+        let productsLoaded = false;
+        let visibleProductCount = 3;
+
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
-            const categoriesResult = await trendixDb.from('trendix_categories').select('*').order('id');
-            if (!categoriesResult.error && categoriesResult.data?.length) {
-                categories = categoriesResult.data.map(row => row.name);
+            const withTimeout = promise => Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('انتهت مهلة الاتصال بقاعدة البيانات')), 4000))
+            ]);
+
+            const [categoriesResult, productsResult, ordersResult] = await Promise.allSettled([
+                withTimeout(trendixDb.from('trendix_categories').select('*').order('id')),
+                withTimeout(trendixDb.from('trendix_products').select('*').order('id')),
+                withTimeout(trendixDb.from('trendix_orders').select('*'))
+            ]);
+
+            if (categoriesResult.status === 'fulfilled' && !categoriesResult.value.error && categoriesResult.value.data?.length) {
+                categories = categoriesResult.value.data.map(row => row.name);
             }
 
-            const productsResult = await trendixDb.from('trendix_products').select('*').order('id');
-            if (!productsResult.error && productsResult.data) {
-                products = productsResult.data.map(row => ({
-                    id: row.id,
-                    name: row.name,
-                    category: row.category,
-                    price: Number(row.price),
-                    oldPrice: row.old_price ?? "",
-                    image: row.image || FALLBACK_LOGO,
-                    images: splitProductImages(row.image),
-                    desc: row.description || '',
-                    gender: row.gender || 'مشترك',
-                }));
+            if (productsResult.status === 'fulfilled' && !productsResult.value.error && productsResult.value.data) {
+                if (productsResult.value.data.length) {
+                    products = productsResult.value.data.map(row => ({
+                        id: row.id,
+                        name: row.name,
+                        category: row.category,
+                        price: Number(row.price),
+                        oldPrice: row.old_price ?? "",
+                        image: row.image || FALLBACK_LOGO,
+                        images: splitProductImages(row.image),
+                        desc: row.description || '',
+                        gender: row.gender || 'مشترك',
+                    }));
+                }
+            } else {
+                console.warn('تعذر تحميل المنتجات من Supabase، يتم إبقاء المنتجات الأولى ظاهرة.',
+                    productsResult.reason || productsResult.value?.error);
             }
 
-            const ordersResult = await trendixDb.from('trendix_orders').select('*');
-            if (!ordersResult.error && ordersResult.data) {
-                orders = ordersResult.data.map(row => ({
+            if (ordersResult.status === 'fulfilled' && !ordersResult.value.error && ordersResult.value.data) {
+                orders = ordersResult.value.data.map(row => ({
                     id: row.id,
                     date: row.date,
                     customer: row.customer,
@@ -1095,23 +1116,26 @@
 
         function filterProducts(cat) {
             currentFilter = cat;
+            visibleProductCount = 3;
             renderCategories();
             renderProducts();
         }
 
         function filterGender(gender) {
             currentGenderFilter = gender;
+            visibleProductCount = 3;
             document.querySelectorAll('#gender-filter-bar .cat-btn').forEach(button => button.classList.remove('active'));
-            event.target.classList.add('active');
+            if (typeof event !== 'undefined' && event?.target) event.target.classList.add('active');
+            renderProducts();
+        }
+
+        function showMoreProducts() {
+            visibleProductCount += 3;
             renderProducts();
         }
 
         function renderProducts() {
             const grid = document.getElementById('products-grid');
-            if (!productsLoaded) {
-                grid.innerHTML = renderedProductsPreview();
-                return;
-            }
             const filtered = products.filter(p => {
                 const categoryMatch = currentFilter === 'الكل' || p.category === currentFilter;
                 const genderMatch = currentGenderFilter === 'all' || p.gender === 'مشترك' ||
@@ -1120,14 +1144,15 @@
                 return categoryMatch && genderMatch;
             });
 
-            const renderedProducts = productsLoaded ? filtered : filtered.slice(0, 6);
-
             if (filtered.length === 0) {
                 grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد منتجات في هذا القسم حالياً.</p>`;
                 return;
             }
 
-            grid.innerHTML = renderedProducts.map(p => {
+            visibleProductCount = Math.max(3, Math.min(visibleProductCount, filtered.length));
+            const visibleProducts = filtered.slice(0, visibleProductCount);
+
+            grid.innerHTML = visibleProducts.map(p => {
                 let hasDiscount = p.oldPrice && Number(p.oldPrice) > Number(p.price);
                 let discountPercent = hasDiscount ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
 
@@ -1161,7 +1186,13 @@
                         </div>
                     </div>
                 `;
-            }).join('');
+            }).join('') + (visibleProductCount < filtered.length ? `
+                <div style="grid-column:1/-1;text-align:center;padding:20px 0 5px;">
+                    <button class="btn btn-gold" type="button" onclick="showMoreProducts()" style="border-radius:25px;padding:10px 28px;">
+                        عرض المزيد <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
+            ` : '');
         }
 
         function shareProductWhatsApp(name, price) {
@@ -1679,7 +1710,7 @@
                         }
                         resolve(dataUrl);
                     };
-                    image.src = reader.result
+                    image.src = reader.result;
                 };
                 reader.readAsDataURL(file);
             });
@@ -1688,6 +1719,8 @@
         function openProductDetail(id) {
             const product = products.find(item => String(item.id) === String(id));
             if (!product) return;
+           
+
             activeDetailProductId = product.id;
             activeGalleryIndex = 0;
             renderProductDetail();
