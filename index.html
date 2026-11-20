@@ -952,14 +952,21 @@
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const ADMIN_PASS = "TR$11*2026!";
         const FALLBACK_LOGO = "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=600&q=80";
 
         const SUPABASE_URL = "https://wusiwphxjqwnmwkxcqac.supabase.co";
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_tCPv7dfMWzFZQYxTMRv2Bg_9HlyCtgt";
-        const trendixDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        let trendixDb = null;
+
+        function initializeTrendixDatabase() {
+            if (window.supabase) {
+                trendixDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+                if (typeof loadSharedData === 'function') loadSharedData().catch(error => console.error('Supabase load error:', error));
+            }
+        }
 
         const defaultCategories = ["ساعات", "أساور", "سلاسل", "نظارات"];
         let categories = defaultCategories;
@@ -1591,7 +1598,8 @@
         renderCategories();
         renderProducts();
         updateCartBadge();
-        loadSharedData().catch(error => console.error('Supabase load error:', error));
+        window.addEventListener('load', initializeTrendixDatabase, { once: true });
+
 
         function editProduct(id) {
             const product = products.find(item => String(item.id) === String(id));
@@ -1634,6 +1642,8 @@
             try {
                 const dataUrls = await Promise.all(files.map(file => compressPhoneImage(file)));
                 const uniqueDataUrls = [...new Set(dataUrls)];
+
+               
 
                 if (!uniqueDataUrls.length) {
                     throw new Error('لم يتم تجهيز أي صورة صالحة');
