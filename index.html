@@ -1000,7 +1000,7 @@
             }
 
             const productsResult = await trendixDb.from('trendix_products').select('*').order('id');
-            if (!productsResult.error && productsResult.data) {
+            if (!productsResult.error && Array.isArray(productsResult.data) && productsResult.data.length) {
                 products = productsResult.data.map(row => ({
                     id: row.id,
                     name: row.name,
