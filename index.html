@@ -978,11 +978,7 @@
 
         let categories = defaultCategories;
         let savedCache = [];
-        let products = defaultProducts.map(product => ({
-            ...product,
-            images: splitProductImages(product.image),
-            gender: 'مشترك'
-        }));
+        let products = [];
 
         let orders = [];
         let cart = JSON.parse(localStorage.getItem('trendix_cart') || '[]');
@@ -991,6 +987,7 @@
         let currentGenderFilter = 'all';
         let adminProductFilter = 'الكل';
         let productsLoaded = true;
+        let visibleProductsLimit = 3;
         function splitProductImages(value) { return value ? String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean) : [FALLBACK_LOGO]; }
 
         async function loadSharedData() {
@@ -1000,7 +997,7 @@
             }
 
             const productsResult = await trendixDb.from('trendix_products').select('*').order('id');
-            if (!productsResult.error && Array.isArray(productsResult.data) && productsResult.data.length) {
+            if (!productsResult.error && productsResult.data) {
                 products = productsResult.data.map(row => ({
                     id: row.id,
                     name: row.name,
@@ -1012,8 +1009,6 @@
                     desc: row.description || '',
                     gender: row.gender || 'مشترك',
                 }));
-
-                localStorage.setItem('trendix_products_cache', JSON.stringify(products));
             }
 
             const ordersResult = await trendixDb.from('trendix_orders').select('*');
@@ -1101,12 +1096,14 @@
 
         function filterProducts(cat) {
             currentFilter = cat;
+            visibleProductsLimit = 3;
             renderCategories();
             renderProducts();
         }
 
         function filterGender(gender) {
             currentGenderFilter = gender;
+            visibleProductsLimit = 3;
             document.querySelectorAll('#gender-filter-bar .cat-btn').forEach(button => button.classList.remove('active'));
             event.target.classList.add('active');
             renderProducts();
@@ -1679,12 +1676,14 @@
 
                         let quality = 0.72;
                         let dataUrl = canvas.toDataURL('image/jpeg', quality);
-                       
                         while (dataUrl.length > 500000 && quality > 0.45) {
+
+
+
                             quality -= 0.1;
                             dataUrl = canvas.toDataURL('image/jpeg', quality);
                         }
-                       
+                        resolve(dataUrl);
                     };
                     image.src = reader.result
                 };
